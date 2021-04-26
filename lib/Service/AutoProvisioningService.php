@@ -84,7 +84,7 @@ class AutoProvisioningService {
 		$openIdConfig = $this->getOpenIdConfiguration();
 		$provisioningClaim = $openIdConfig['auto-provision']['provisioning-claim'] ?? null;
 		if ($provisioningClaim) {
-			$this->logger->debug('ProvisioningClaim is defined for auto-provision');
+			$this->logger->debug('ProvisioningClaim is defined for auto-provision', ['claim' => $provisioningClaim]);
 			$provisioningAttribute = $openIdConfig['auto-provision']['provisioning-attribute'] ?? null;
 			if (! \in_array($provisioningAttribute, $userInfo->$provisioningClaim, true)) {
 				throw new LoginException("Required provisioning attribute is not found.");
