@@ -1,7 +1,7 @@
 {
-    "name": "owncloud/openidconnect",
+    "name": "cesnet/cesnet-openidconnect",
     "type": "library",
-    "description": "OpenId Connect app for ownCloud",
+    "description": "CESNET OpenId Connect app for ownCloud",
     "require": {
         "php": ">=7.1",
         "jumbojett/openid-connect-php": "^0.9.0"
@@ -14,7 +14,7 @@
             "bin-links": false
         }
     },
-    "license": "AGPL",
+    "license": "GPL-2.0-only",
     "authors": [
         {
             "name": "Thomas Müller",

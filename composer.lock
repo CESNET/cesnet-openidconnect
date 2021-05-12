@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "565176544e66fd24dd9a2f8979d95dcb",
+    "content-hash": "5b947d232c2c661f6b1964097768eab8",
     "packages": [
         {
             "name": "jumbojett/openid-connect-php",
