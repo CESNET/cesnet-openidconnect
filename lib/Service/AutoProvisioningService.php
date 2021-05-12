@@ -1,6 +1,7 @@
 <?php
 /**
  * @author Thomas Müller <thomas.mueller@tmit.eu>
+ * @author Ilja Neumann <ineumann@owncloud.com>
  *
  * @copyright Copyright (c) 2020, ownCloud GmbH
  * @license GPL-2.0
@@ -80,15 +81,32 @@ class AutoProvisioningService {
 		if (!$emailOrUserId) {
 			throw new LoginException("Configured attribute $attribute is not known.");
 		}
+		$userId = $this->mode() === 'email' ? $this->generateUserId() : $emailOrUserId;
+
+		$openIdConfig = $this->getOpenIdConfiguration();
+		$provisioningClaim = $openIdConfig['auto-provision']['provisioning-claim'] ?? null;
+		if ($provisioningClaim) {
+			$this->logger->debug('ProvisioningClaim is defined for auto-provision', ['claim' => $provisioningClaim]);
+			$provisioningAttribute = $openIdConfig['auto-provision']['provisioning-attribute'] ?? null;
+
+			if (!\property_exists($userInfo, $provisioningClaim) || !\is_array($userInfo->$provisioningClaim)) {
+				throw new LoginException('Required provisioning attribute is not found.');
+			}
+
+			if (!\in_array($provisioningAttribute, $userInfo->$provisioningClaim, true)) {
+				throw new LoginException('Required provisioning attribute is not found.');
+			}
+		}
+
 		$userId = $this->mode() === 'email' ? \uniqid('oidc-user-') : $emailOrUserId;
 		$passwd = \uniqid('', true);
 		$email = $this->mode() === 'email' ? $emailOrUserId : null;
-		$user = $this->userManager->createUser($userId, $passwd);
+		$user = $this->userManager->createUser($userId, $this->generatePassword());
 		if (!$user) {
 			throw new LoginException("Unable to create user $userId");
 		}
 		$user->setEnabled(true);
-		$openIdConfig = $this->getOpenIdConfiguration();
+
 		if ($email) {
 			$user->setEMailAddress($email);
 		} else {
@@ -144,5 +162,13 @@ class AutoProvisioningService {
 	protected function downloadPicture(string $pictureUrl) {
 		$response = $this->clientService->newClient()->get($pictureUrl);
 		return $response->getBody();
+	}
+
+	private function generateUserId() {
+		return 'oidc-user-'.\bin2hex(\random_bytes(16));
+	}
+
+	private function generatePassword() {
+		return \bin2hex(\random_bytes(32));
 	}
 }
