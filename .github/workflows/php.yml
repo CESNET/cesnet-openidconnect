@@ -25,11 +25,10 @@ jobs:
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-php-
-
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
       - name: Building dist
-      - run: make dist
+        run: make dist
       - name: Built app distribution
         run: ls -R build
       - name: Release app distribution assets
