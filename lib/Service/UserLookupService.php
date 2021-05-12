@@ -94,13 +94,13 @@ class UserLookupService {
 		}
 		$user = $this->userManager->get($userInfo->$attribute);
 		if (!$user) {
-            $userId = $this->idMapper->getOcUserID($userInfo->$attribute);
-            $user = $this->userManager->get($userInfo);
-            if (!$user) {
-                if ($this->autoProvisioningService->enabled()) {
-                    return $this->autoProvisioningService->createUser($userInfo);
-                }
-            }
+			$userId = $this->idMapper->getOcUserID($userInfo->$attribute);
+			$user = $this->userManager->get($userInfo);
+			if (!$user) {
+				if ($this->autoProvisioningService->enabled()) {
+					return $this->autoProvisioningService->createUser($userInfo);
+				}
+			}
 			throw new LoginException("User {$userInfo->$attribute} is not known.");
 		}
 		$this->validUser($user);
