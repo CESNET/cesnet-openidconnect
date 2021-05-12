@@ -30,6 +30,6 @@ jobs:
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         uses: softprops/action-gh-release@v1
         with:
-          files: build/dist/openidconnect.tar.gz
+          files: build/dist/cesnet-openidconnect.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
