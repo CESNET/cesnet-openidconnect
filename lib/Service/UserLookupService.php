@@ -19,16 +19,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 namespace OCA\CesnetOpenIdConnect\Service;
 
 use OC\HintException;
 use OC\User\LoginException;
 use OCA\CesnetOpenIdConnect\Client;
 use OCA\CesnetOpenIdConnect\Db\IdentityMapper;
+use OCP\ILogger;
 use OCP\IUser;
 use OCP\IUserManager;
+use function count;
+use function in_array;
+use function property_exists;
 
-class UserLookupService {
+class UserLookupService
+{
 
 	/**
 	 * @var IUserManager
@@ -46,16 +52,17 @@ class UserLookupService {
 	 * @var ILogger
 	 */
 	private $logger;
-    /**
-     * @var IdentityMapper
-     */
-    private $idMapper;
+	/**
+	 * @var IdentityMapper
+	 */
+	private $idMapper;
 
 	public function __construct(IUserManager $userManager,
 								Client $client,
 								AutoProvisioningService $autoProvisioningService,
 								ILogger $logger,
-								IdentityMapper $idMapper) {
+								IdentityMapper $idMapper)
+	{
 		$this->userManager = $userManager;
 		$this->client = $client;
 		$this->autoProvisioningService = $autoProvisioningService;
@@ -69,7 +76,8 @@ class UserLookupService {
 	 * @throws LoginException
 	 * @throws HintException
 	 */
-	public function lookupUser($userInfo): IUser {
+	public function lookupUser($userInfo): IUser
+	{
 		$openIdConfig = $this->client->getOpenIdConfig();
 		if ($openIdConfig === null) {
 			throw new HintException('Configuration issue in openidconnect app');
@@ -79,7 +87,7 @@ class UserLookupService {
 			$searchByEmail = false;
 		}
 		$attribute = $openIdConfig['search-attribute'] ?? 'email';
-		if (!\property_exists($userInfo, $attribute)) {
+		if (!property_exists($userInfo, $attribute)) {
 			throw new LoginException("Configured attribute $attribute is not known.");
 		}
 
@@ -92,7 +100,7 @@ class UserLookupService {
 
 				throw new LoginException("User with {$userInfo->$attribute} is not known.");
 			}
-			if (\count($user) !== 1) {
+			if (count($user) !== 1) {
 				throw new LoginException("{$userInfo->$attribute} is not unique.");
 			}
 			$this->validUser($user[0]);
@@ -100,27 +108,33 @@ class UserLookupService {
 		}
 		$user = $this->userManager->get($userInfo->$attribute);
 		if (!$user) {
-			$this->logger->debug('UserLookupService::lookupUser : user: ' . $userInfo->$attribute);
+			$this->logger->debug('UserLookupService::lookupUser : lookup mapping for: ' . $userInfo->$attribute);
 			$userId = $this->idMapper->getOcUserID($userInfo->$attribute);
-			$user = $this->userManager->get($userInfo);
+			if ($userId) {
+				$user = $this->userManager->get($userId);
+				$this->logger->info(sprintf(
+					'UserLookupService::lookupUser : mapped: %s to %s',
+					$userInfo->$attribute, $user->getUID()));
+			}
 			if (!$user) {
 				if ($this->autoProvisioningService->enabled()) {
 					return $this->autoProvisioningService->createUser($userInfo);
 				}
+				throw new LoginException("User {$userInfo->$attribute} is not known.");
 			}
-			throw new LoginException("User {$userInfo->$attribute} is not known.");
 		}
 		$this->validUser($user);
 		return $user;
 	}
 
-	private function validUser(IUser $user): void {
+	private function validUser(IUser $user): void
+	{
 		$openIdConfig = $this->client->getOpenIdConfig();
 		$allowedUserBackEnds = $openIdConfig['allowed-user-backends'] ?? null;
 		if ($allowedUserBackEnds === null) {
 			return;
 		}
-		if (\in_array($user->getBackendClassName(), $allowedUserBackEnds, true)) {
+		if (in_array($user->getBackendClassName(), $allowedUserBackEnds, true)) {
 			return;
 		}
 		throw new LoginException("User is from wrong user backend <{$user->getBackendClassName()}>");
