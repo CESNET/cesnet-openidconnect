@@ -20,15 +20,15 @@
  *
  */
 
-namespace OCA\OpenIdConnect\Tests\Unit;
+namespace OCA\CesnetOpenIdConnect\Tests\Unit;
 
 use Jumbojett\OpenIDConnectClientException;
 use OC\HintException;
 use OC\Memcache\ArrayCache;
-use OCA\OpenIdConnect\Client;
-use OCA\OpenIdConnect\Logger;
-use OCA\OpenIdConnect\OpenIdConnectAuthModule;
-use OCA\OpenIdConnect\Service\UserLookupService;
+use OCA\CesnetOpenIdConnect\Client;
+use OCA\CesnetOpenIdConnect\Logger;
+use OCA\CesnetOpenIdConnect\OpenIdConnectAuthModule;
+use OCA\CesnetOpenIdConnect\Service\UserLookupService;
 use OCP\ICacheFactory;
 use OCP\ILogger;
 use OCP\IRequest;

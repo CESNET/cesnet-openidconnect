@@ -1,8 +1,8 @@
 <?php
 /**
- * @author Thomas Müller <thomas.mueller@tmit.eu>
  *
- * @copyright Copyright (c) 2020, ownCloud GmbH
+ * @author Miroslav Bauer, CESNET <bauer@cesnet.cz>
+ * @copyright Miroslav Bauer, CESNET 2021
  * @license GPL-2.0
  *
  * This program is free software; you can redistribute it and/or
@@ -20,10 +20,18 @@
  *
  */
 
-use OCA\CesnetOpenIdConnect\Application;
+namespace OCA\CesnetOpenIDConnect\Db;
 
-// @codeCoverageIgnoreStart
-(static function () {
-	$app = new Application();
-	$app->boot();
-})();
+use OCP\AppFramework\Db\Entity;
+
+/**
+ * @package OCA\UserOpenIDC\Db\Legacy;
+ */
+class Identity extends Entity
+{
+
+    protected $oidcUserid;
+    protected $ocUserid;
+    protected $nickname;
+    protected $lastSeen;
+}

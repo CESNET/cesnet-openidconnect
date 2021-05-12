@@ -19,11 +19,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\OpenIdConnect;
+namespace OCA\CesnetOpenIdConnect;
 
 use Jumbojett\OpenIDConnectClientException;
 use OC\User\LoginException;
-use OCA\OpenIdConnect\Service\UserLookupService;
+use OCA\CesnetOpenIdConnect\Service\UserLookupService;
 use OCP\Authentication\IAuthModule;
 use OCP\ICache;
 use OCP\ICacheFactory;

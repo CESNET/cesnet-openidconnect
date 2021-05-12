@@ -20,12 +20,12 @@
  *
  */
 
-namespace OCA\OpenIdConnect\Tests\Unit;
+namespace OCA\CesnetOpenIdConnect\Tests\Unit;
 
 use OC\HintException;
-use OCA\OpenIdConnect\Client;
-use OCA\OpenIdConnect\Logger;
-use OCA\OpenIdConnect\SessionVerifier;
+use OCA\CesnetOpenIdConnect\Client;
+use OCA\CesnetOpenIdConnect\Logger;
+use OCA\CesnetOpenIdConnect\SessionVerifier;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\ISession;

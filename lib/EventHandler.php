@@ -19,9 +19,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\OpenIdConnect;
+namespace OCA\CesnetOpenIdConnect;
 
-use OCA\OpenIdConnect\Sabre\OpenIdSabreAuthBackend;
+use OCA\CesnetOpenIdConnect\Sabre\OpenIdSabreAuthBackend;
 use OCP\IRequest;
 use OCP\ISession;
 use OCP\IUserSession;

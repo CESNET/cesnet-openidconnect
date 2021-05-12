@@ -19,11 +19,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\OpenIdConnect\Service;
+namespace OCA\CesnetOpenIdConnect\Service;
 
 use OC\HintException;
 use OC\User\LoginException;
-use OCA\OpenIdConnect\Client;
+use OCA\CesnetOpenIdConnect\Client;
+use OCA\UserOpenIDC\Db\IdentityMapper;
 use OCP\IUser;
 use OCP\IUserManager;
 
@@ -41,13 +42,19 @@ class UserLookupService {
 	 * @var AutoProvisioningService
 	 */
 	private $autoProvisioningService;
+    /**
+     * @var IdentityMapper
+     */
+    private $idMapper;
 
 	public function __construct(IUserManager $userManager,
 								Client $client,
-								AutoProvisioningService $autoProvisioningService) {
+								AutoProvisioningService $autoProvisioningService,
+                                IdentityMapper $idMapper) {
 		$this->userManager = $userManager;
 		$this->client = $client;
 		$this->autoProvisioningService = $autoProvisioningService;
+		$this->idMapper = $idMapper;
 	}
 
 	/**
@@ -87,9 +94,13 @@ class UserLookupService {
 		}
 		$user = $this->userManager->get($userInfo->$attribute);
 		if (!$user) {
-			if ($this->autoProvisioningService->enabled()) {
-				return $this->autoProvisioningService->createUser($userInfo);
-			}
+            $userId = $this->idMapper->getOcUserID($userInfo->$attribute);
+            $user = $this->userManager->get($userInfo);
+            if (!$user) {
+                if ($this->autoProvisioningService->enabled()) {
+                    return $this->autoProvisioningService->createUser($userInfo);
+                }
+            }
 			throw new LoginException("User {$userInfo->$attribute} is not known.");
 		}
 		$this->validUser($user);

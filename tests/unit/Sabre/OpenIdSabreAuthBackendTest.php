@@ -20,13 +20,13 @@
  *
  */
 
-namespace OCA\OpenIdConnect\Tests\Unit\Sabre;
+namespace OCA\CesnetOpenIdConnect\Tests\Unit\Sabre;
 
 use OC\HintException;
 use OC\User\LoginException;
 use OC\User\Session;
-use OCA\OpenIdConnect\OpenIdConnectAuthModule;
-use OCA\OpenIdConnect\Sabre\OpenIdSabreAuthBackend;
+use OCA\CesnetOpenIdConnect\OpenIdConnectAuthModule;
+use OCA\CesnetOpenIdConnect\Sabre\OpenIdSabreAuthBackend;
 use OCP\IRequest;
 use OCP\ISession;
 use OCP\IUser;

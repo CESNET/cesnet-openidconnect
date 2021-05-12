@@ -19,7 +19,7 @@ services:
       - redis
       - oidc
     environment:
-      - OWNCLOUD_APPS_ENABLE=openidconnect
+      - OWNCLOUD_APPS_ENABLE=cesnet-openidconnect
       - OWNCLOUD_DB_TYPE=mysql
       - OWNCLOUD_DB_NAME=owncloud
       - OWNCLOUD_DB_USERNAME=owncloud

@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <info>
-    <id>openidconnect</id>
+    <id>cesnet-openidconnect</id>
     <name>OpenID Connect</name>
-    <summary>Authentication and SSO with OpenID Connect (OIDC)</summary>
+    <summary>CESNET Authentication and SSO with OpenID Connect (OIDC)</summary>
     <description>
 This extension adds support for [OpenID Connect](https://openid.net/connect/) to ownCloud Server.
-
+It supports OpenID Connect claims used in CESNET e-Infrastructure.
 OpenID Connect is an open standard for single sign-on and identity and access management. With ownCloud it can be used for user authentication and client authorization against an external Identity Provider.
 
 **Benefits of using ownCloud with OpenID Connect**
@@ -25,9 +25,9 @@ More information on setup, configuration and migration can be found in the ownCl
     <documentation>
       <admin>https://doc.owncloud.com/server/latest/admin_manual/configuration/user/oidc/index.html</admin>
     </documentation>
-    <website>https://github.com/owncloud/openidconnect</website>
-    <bugs>https://github.com/owncloud/openidconnect/issues</bugs>
-    <repository type="git">https://github.com/owncloud/openidconnect.git</repository>
+    <website>https://github.com/CESNET/cesnet-openidconnect</website>
+    <bugs>https://github.com/CESNET/cesnet-openidconnect/issues</bugs>
+    <repository type="git">https://github.com/CESNET/cesnet-openidconnect.git</repository>
     <screenshot>https://raw.githubusercontent.com/owncloud/screenshots/master/openidconnect/openidconnect.png</screenshot>
     <dependencies>
         <owncloud min-version="10" max-version="10"/>

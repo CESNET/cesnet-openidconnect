@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\OpenIdConnect;
+namespace OCA\CesnetOpenIdConnect;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 

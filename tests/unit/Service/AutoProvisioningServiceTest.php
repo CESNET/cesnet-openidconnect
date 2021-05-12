@@ -20,11 +20,11 @@
  *
  */
 
-namespace OCA\OpenIdConnect\Tests\Unit\Service;
+namespace OCA\CesnetOpenIdConnect\Tests\Unit\Service;
 
 use OC\Avatar;
 use OC\User\LoginException;
-use OCA\OpenIdConnect\Service\AutoProvisioningService;
+use OCA\CesnetOpenIdConnect\Service\AutoProvisioningService;
 use OCP\Http\Client\IClient;
 use OCP\Http\Client\IClientService;
 use OCP\Http\Client\IResponse;

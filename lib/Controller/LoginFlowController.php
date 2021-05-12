@@ -19,15 +19,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\OpenIdConnect\Controller;
+namespace OCA\CesnetOpenIdConnect\Controller;
 
 use Jumbojett\OpenIDConnectClientException;
 use OC\HintException;
 use OC\User\LoginException;
 use OC\User\Session;
-use OCA\OpenIdConnect\Client;
-use OCA\OpenIdConnect\Logger;
-use OCA\OpenIdConnect\Service\UserLookupService;
+use OCA\CesnetOpenIdConnect\Client;
+use OCA\CesnetOpenIdConnect\Logger;
+use OCA\CesnetOpenIdConnect\Service\UserLookupService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\RedirectResponse;

@@ -19,11 +19,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\OpenIdConnect\Sabre;
+namespace OCA\CesnetOpenIdConnect\Sabre;
 
 use OC\User\Session;
 use OCA\DAV\Connector\Sabre\Auth;
-use OCA\OpenIdConnect\OpenIdConnectAuthModule;
+use OCA\CesnetOpenIdConnect\OpenIdConnectAuthModule;
 use OCP\IRequest;
 use OCP\ISession;
 use OCP\IUserSession;

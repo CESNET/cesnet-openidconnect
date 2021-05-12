@@ -20,7 +20,7 @@
  *
  */
 
-namespace OCA\OpenIdConnect;
+namespace OCA\CesnetOpenIdConnect;
 
 use OCP\ILogger;
 

@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\OpenIdConnect;
+namespace OCA\CesnetOpenIdConnect;
 
 use Jumbojett\OpenIDConnectClientException;
 use OC\HintException;
