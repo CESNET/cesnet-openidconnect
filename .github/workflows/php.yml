@@ -28,7 +28,7 @@ jobs:
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
-      - name Building dist
+      - name: Building dist
       - run: make dist
       - name: Built app distribution
         run: ls -R build
