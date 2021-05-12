@@ -1,7 +1,7 @@
 {
-    "name": "owncloud/openidconnect",
+    "name": "CESNET/cesnet-openidconnect",
     "type": "library",
-    "description": "OpenId Connect app for ownCloud",
+    "description": "CESNET OpenId Connect app for ownCloud",
     "require": {
         "php": ">=7.1",
         "jumbojett/openid-connect-php": "^0.9.0"
