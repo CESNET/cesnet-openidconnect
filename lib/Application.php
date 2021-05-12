@@ -39,7 +39,7 @@ class Application extends App {
 	 * @codeCoverageIgnore
 	 */
 	public function __construct(array $urlParams = []) {
-		parent::__construct('openidconnect', $urlParams);
+		parent::__construct('cesnet-openidconnect', $urlParams);
 	}
 
 	/**

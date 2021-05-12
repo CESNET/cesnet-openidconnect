@@ -167,7 +167,7 @@ class Client extends OpenIDConnectClient {
 	 * @throws OpenIDConnectClientException
 	 */
 	public function authenticate() : bool {
-		$redirectUrl = $this->generator->linkToRouteAbsolute('openidconnect.loginFlow.login');
+		$redirectUrl = $this->generator->linkToRouteAbsolute('cesnet-openidconnect.loginFlow.login');
 
 		$openIdConfig = $this->getOpenIdConfig();
 		if (isset($openIdConfig['redirect-url'])) {

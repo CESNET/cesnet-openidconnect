@@ -22,6 +22,8 @@ jobs:
             ${{ runner.os }}-php-
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
+      - name: Run PHP Unit tests
+        run: make test-php-unit
       - name: Building dist
         run: make dist
       - name: Built app distribution

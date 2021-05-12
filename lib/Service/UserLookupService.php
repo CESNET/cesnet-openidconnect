@@ -24,7 +24,7 @@ namespace OCA\CesnetOpenIdConnect\Service;
 use OC\HintException;
 use OC\User\LoginException;
 use OCA\CesnetOpenIdConnect\Client;
-use OCA\UserOpenIDC\Db\IdentityMapper;
+use OCA\CesnetOpenIdConnect\Db\IdentityMapper;
 use OCP\IUser;
 use OCP\IUserManager;
 
@@ -42,6 +42,10 @@ class UserLookupService {
 	 * @var AutoProvisioningService
 	 */
 	private $autoProvisioningService;
+	/**
+	 * @var ILogger
+	 */
+	private $logger;
     /**
      * @var IdentityMapper
      */
@@ -50,10 +54,12 @@ class UserLookupService {
 	public function __construct(IUserManager $userManager,
 								Client $client,
 								AutoProvisioningService $autoProvisioningService,
-                                IdentityMapper $idMapper) {
+								ILogger $logger,
+								IdentityMapper $idMapper) {
 		$this->userManager = $userManager;
 		$this->client = $client;
 		$this->autoProvisioningService = $autoProvisioningService;
+		$this->logger = $logger;
 		$this->idMapper = $idMapper;
 	}
 
@@ -94,6 +100,7 @@ class UserLookupService {
 		}
 		$user = $this->userManager->get($userInfo->$attribute);
 		if (!$user) {
+			$this->logger->debug('UserLookupService::lookupUser : user: ' . $userInfo->$attribute);
 			$userId = $this->idMapper->getOcUserID($userInfo->$attribute);
 			$user = $this->userManager->get($userInfo);
 			if (!$user) {

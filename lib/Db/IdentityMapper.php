@@ -20,9 +20,8 @@
  *
  */
 
-namespace OCA\UserOpenIDC\Db;
+namespace OCA\CesnetOpenIdConnect\Db;
 
-use OCA\UserOpenIDC\Db\Identity;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\Mapper;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
