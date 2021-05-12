@@ -1,5 +1,5 @@
 {
-    "name": "CESNET/cesnet-openidconnect",
+    "name": "cesnet/cesnet-openidconnect",
     "type": "library",
     "description": "CESNET OpenId Connect app for ownCloud",
     "require": {

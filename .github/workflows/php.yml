@@ -8,9 +8,8 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    container: owncloudci/php:7.3
     steps:
       - uses: actions/checkout@v2
 
