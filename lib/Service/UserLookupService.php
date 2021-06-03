@@ -99,7 +99,10 @@ class UserLookupService {
 			$this->validUser($user[0]);
 			return $user[0];
 		}
-		$user = $this->userManager->get($userInfo->$attribute);
+		$stripUserIdDomain = $openIdConfig['auto-provision']['strip-userid-domain'] ?? false;
+		$userName = $stripUserIdDomain? \strstr($userInfo->$attribute, '@', true) : $userInfo->$attribute;
+
+		$user = $this->userManager->get($userName);
 		if (!$user) {
 			$this->logger->debug('UserLookupService::lookupUser : looking up mapping for: ' . $userInfo->$attribute);
 			$userId = $this->idMapper->getOcUserID($userInfo->$attribute);
