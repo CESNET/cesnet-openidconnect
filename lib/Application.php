@@ -71,8 +71,10 @@ class Application extends App {
 
 		// Add event listener
 		$dispatcher = $server->getEventDispatcher();
-		$eventHandler = new EventHandler($dispatcher, $request, $userSession, $session);
-		$eventHandler->registerEventHandler();
+
+//		TODO: Uncomment this to enable OpenIDConnect support for ownCloud clients
+//		$eventHandler = new EventHandler($dispatcher, $request, $userSession, $session);
+//		$eventHandler->registerEventHandler();
 
 		// verify the session
 		$sessionVerifier = new SessionVerifier($this->logger, $session, $userSession, $memCacheFactory, $dispatcher, $client);
