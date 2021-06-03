@@ -98,9 +98,17 @@ class AutoProvisioningService {
 			}
 		}
 
-		$userId = $this->mode() === 'email' ? \uniqid('oidc-user-') : $emailOrUserId;
+		if ($this->mode() === 'email') {
+			$userId = \uniqid('oidc-user-');
+			$email = $emailOrUserId;
+		} else {
+			$stripUserIdDomain = $openIdConfig['auto-provision']['strip-userid-domain'] ?? false;
+
+			$userId = $stripUserIdDomain ? \strstr($emailOrUserId, '@', true): $emailOrUserId;
+			$email = null;
+		}
+
 		$passwd = \uniqid('', true);
-		$email = $this->mode() === 'email' ? $emailOrUserId : null;
 		$user = $this->userManager->createUser($userId, $this->generatePassword());
 		if (!$user) {
 			throw new LoginException("Unable to create user $userId");

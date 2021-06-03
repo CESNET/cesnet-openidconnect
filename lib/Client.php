@@ -109,6 +109,20 @@ class Client extends OpenIDConnectClient {
 		return $this->requestUserInfo();
 	}
 
+	public function checkEligible($userInfo): bool {
+		$openIdConfig = $this->getOpenIdConfig();
+		if (isset($openIdConfig['eligible-timestamp-claim']) && $openIdConfig['eligible-timestamp-claim']) {
+			$eligibleAttribute = $openIdConfig['eligible-timestamp-claim'];
+			$eligibleTimestamp = \strtotime($userInfo->$eligibleAttribute);
+			$eligibleExpiry = \strtotime($openIdConfig['eligible-expiry'] ?? '-1 year');
+
+			if (!$eligibleTimestamp or $eligibleTimestamp < $eligibleExpiry) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public function storeRedirectUrl(?string $redirectUrl): void {
 		if ($redirectUrl) {
 			$this->setSessionKey('openid_connect_redirect_url', $redirectUrl);

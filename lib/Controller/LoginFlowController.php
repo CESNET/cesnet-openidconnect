@@ -140,6 +140,11 @@ class LoginFlowController extends Controller {
 		if (!$userInfo) {
 			throw new LoginException('No user information available.');
 		}
+
+		if (!$openid->checkEligible($userInfo)) {
+			throw new LoginException('User is not eligible to access the service.');
+		}
+
 		$user = $this->userLookup->lookupUser($userInfo);
 
 		// trigger login process
