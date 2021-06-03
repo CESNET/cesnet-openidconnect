@@ -115,8 +115,6 @@ class AutoProvisioningService {
 		}
 		$user->setEnabled(true);
 
-
-
 		if ($email) {
 			$user->setEMailAddress($email);
 		} else {
