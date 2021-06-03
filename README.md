@@ -71,6 +71,8 @@ $CONFIG = [
       'display-name-claim' => 'given_name', 
       // defines the claim which holds the picture of the user - must be a URL
       'picture-claim' => 'picture', 
+      // useful for cases when userid claim is user@domain and domain is always the same
+      'strip-userid-domain' => false,
       // defines a list of groups to which the newly created user will be added automatically
       'groups' => ['admin', 'guests', 'employees'], 
     ]
@@ -96,7 +98,8 @@ $CONFIG = [
 - search-attribute - the attribute which is taken from the access token JWT or user info endpoint to identify the user
 - allowed-user-backends - limit the users which are allowed to login to a specific user backend - e.g. LDAP
 - use-access-token-payload-for-user-info - if set to true any user information will be read from the access token. If set to false the userinfo endpoint is used (starting app version 1.1.0)
-
+- eligible-timestamp-claim - defines the claim which holds the timestamp of user's last login to IdP using an identity eligible to access the services
+- eligible-expiry - an expiration period against which the user's eligible timestamp is checked upon login (defaults to 365 days)
 
 ### Setup within the OpenId Provider
 When registering ownCloud as OpenId Client use ```https://cloud.example.net/index.php/apps/openidconnect/redirect``` as redirect url .

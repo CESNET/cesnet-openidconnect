@@ -100,15 +100,18 @@ class UserLookupService {
 		}
 		$user = $this->userManager->get($userInfo->$attribute);
 		if (!$user) {
-			$this->logger->debug('UserLookupService::lookupUser : user: ' . $userInfo->$attribute);
+			$this->logger->debug('UserLookupService::lookupUser : looking up mapping for: ' . $userInfo->$attribute);
 			$userId = $this->idMapper->getOcUserID($userInfo->$attribute);
-			$user = $this->userManager->get($userInfo);
+			if ($userId) {
+				$user = $this->userManager->get($userId);
+				$this->logger->info(sprintf('UserLookupService::lookupUser : mapped: %s to %s',  $userInfo->$attribute, $user->getUID()));
+			}
 			if (!$user) {
 				if ($this->autoProvisioningService->enabled()) {
 					return $this->autoProvisioningService->createUser($userInfo);
 				}
+				throw new LoginException("User {$userInfo->$attribute} is not known.");
 			}
-			throw new LoginException("User {$userInfo->$attribute} is not known.");
 		}
 		$this->validUser($user);
 		return $user;
