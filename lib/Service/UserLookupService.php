@@ -27,6 +27,7 @@ use OCA\CesnetOpenIdConnect\Client;
 use OCA\CesnetOpenIdConnect\Db\IdentityMapper;
 use OCP\IUser;
 use OCP\IUserManager;
+use OCP\ILogger;
 
 class UserLookupService {
 
