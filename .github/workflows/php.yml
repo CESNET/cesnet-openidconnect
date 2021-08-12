@@ -21,7 +21,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-php-
       - name: Update lockfile
-        run: composer update
+        run: composer update -W
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 #      - name: Run PHP Unit tests
