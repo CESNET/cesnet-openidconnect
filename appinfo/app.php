@@ -20,10 +20,24 @@
  *
  */
 
+use OC;
 use OCA\CesnetOpenIdConnect\Application;
 
 // @codeCoverageIgnoreStart
 (static function () {
+	$excludedUrls = '^/'
+		. '(remote.php'
+		. '|public.php'
+		. '|ocs'
+		. ')';
+
+	$excludedRegex = '/' . str_replace('/', '\/', $excludedUrls) . '/i';
+
 	$app = new Application();
-	$app->boot();
+	$server = $app->getContainer()->getServer();
+	$requestUri = $server->getRequest()->getRequestUri();
+
+	if (!\OC::$CLI && !preg_match($excludedRegex, $requestUri)) {
+		$app->boot();
+	}
 })();
