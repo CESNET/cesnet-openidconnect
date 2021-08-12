@@ -20,6 +20,8 @@ jobs:
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-php-
+      - name: Update lockfile
+        run: composer update
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 #      - name: Run PHP Unit tests
