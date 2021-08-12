@@ -59,16 +59,14 @@ class GroupMapper extends Mapper
 	}
 
 	/**
-	 * Returns an ownCloud group ID associated with the external group UUID
+	 * Returns a Group entity by its external persistent UUID
 	 *
 	 * @param string $oidcGroupUuid external group UUID from OIDC claim
-	 *
-	 * @return ?Group ownCloud internal group associated with UUID
 	 *
 	 * @return ?Group Group DB entity
 	 * or null if not found
 	 */
-	public function getGroupID($oidcGroupUuid): ?Group
+	public function get($oidcGroupUuid): ?Group
 	{
 		$sql = sprintf('SELECT * FROM `%s` WHERE `oidc_group_uuid`=?', $this->getTableName());
 		$args = [$oidcGroupUuid];
@@ -89,6 +87,26 @@ class GroupMapper extends Mapper
 			return null;
 		}
 		return $group->getOcGroupId();
+	}
+
+
+	/**
+	 * Returns an ownCloud group ID associated with the external group UUID
+	 *
+	 * @param string $oidcGroupUuid external group UUID from OIDC claim
+	 *
+	 * @return ?Group ownCloud internal group associated with UUID
+	 *
+	 * @return ?Group Group DB entity
+	 * or null if not found
+	 */
+	public function getGroupID($oidcGroupUuid): ?Group
+	{
+		$group = $this->get($oidcGroupUuid);
+		if ($group) {
+			return $group->getOcGroupId();
+		}
+		return null;
 	}
 
 	/**
@@ -128,5 +146,20 @@ class GroupMapper extends Mapper
 				), $this->logCtx
 			);
 		}
+	}
+
+	/**
+	 * List all group mappings
+	 *
+	 * @param string $nickname search
+	 * @param int|null $limit the maximum number of returned rows
+	 * @param int|null $offset from which row we want to start
+	 *
+	 * @return array(Identity) identities found
+	 */
+	public function list(int $limit = null, int $offset = null): array
+	{
+		$sql = sprintf('SELECT * FROM `%s`', $this->getTableName());
+		return $this->findEntities($sql, [], $limit, $offset);
 	}
 }

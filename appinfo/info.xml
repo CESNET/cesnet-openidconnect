@@ -39,4 +39,9 @@ More information on setup, configuration and migration can be found in the ownCl
     <auth-modules>
         <module>OCA\CesnetOpenIdConnect\OpenIdConnectAuthModule</module>
     </auth-modules>
+    <commands>
+        <command>OCA\CesnetOpenIdConnect\Command\LinkExternalGroup</command>
+        <command>OCA\CesnetOpenIdConnect\Command\UnlinkExternalGroup</command>
+        <command>OCA\CesnetOpenIdConnect\Command\ListExternalGroups</command>
+    </commands>
 </info>
