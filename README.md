@@ -54,6 +54,25 @@ $CONFIG = [
 ];
 ```
 
+### Setup group synchronization mode
+The group synchronization mode will automatically synchronize user groups provided in `groups-claim` with
+ownCloud groups upon user's login.
+
+```php
+$CONFIG = [
+  'openid-connect' => [
+    'group-sync' => [
+      // explicit enable the group sync mode
+      'enabled' => true,
+      // defines the claim which holds the user's external groups
+      'groups-claim' => 'eduperson_entitlement_extended',
+      // synchronize groups from this realm only (e.g. with URNs starting with `urn:geant:cesnet.cz:...`)
+      'groups-realm' => 'cesnet.cz',
+    ]
+  ]
+]
+```
+
 ### Setup auto provisioning mode
 The auto provisioning mode will create a user based on the provided user information as returned by the OpenID Connect provider.
 The config parameters 'mode' and 'search-attribute' will be used to create a unique user so that the lookup mechanism can find the user again.

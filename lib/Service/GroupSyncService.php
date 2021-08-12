@@ -21,6 +21,8 @@
  */
 namespace OCA\CesnetOpenIdConnect\Service;
 
+use OCA\CesnetOpenIdConnect\Db\GroupMapper;
+
 use OC\User\LoginException;
 use OCP\Http\Client\IClientService;
 use OCP\IAvatarManager;
@@ -46,6 +48,10 @@ class GroupSyncService {
 	 */
 	private $groupManager;
 	/**
+	 * @var GroupMapper
+	 */
+	private $groupMapper;
+	/**
 	 * @var ILogger
 	 */
 	private $logger;
@@ -56,11 +62,13 @@ class GroupSyncService {
 
 	public function __construct(IUserManager $userManager,
 								IGroupManager $groupManager,
+								GroupMapper $groupMapper,
 								ILogger $logger,
 								IConfig $config,
 								Parser $urnParser) {
 		$this->userManager = $userManager;
 		$this->groupManager = $groupManager;
+		$this->groupMapper = $groupMapper;
 		$this->logger = $logger;
 		$this->config = $config;
 		$this->urnParser = $urnParser;
@@ -77,13 +85,26 @@ class GroupSyncService {
 		}
 		$groups = $userInfo->$groupsClaim;
 		foreach ($groups as $groupUrn) {
-			$groupAttrs = $$this->urnParser->parse($groupUrn);
-			$this->logger->debug("Parsed group data $groupAttrs");
+			$groupAttrs = $this->urnParser->parse('urn:' . substr($groupUrn,4));
+			$gNS = $groupAttrs->getNamespaceIdentifier();
+			$gNSS = $groupAttrs->getNamespaceSpecificString();
+			$gRQF = $groupAttrs->getRQF();
 
-//			$g = $this->groupManager->get($group);
-//			if ($g) {
-//				$g->addUser($user);
-//			}
+			if (substr($gNSS, 0, strlen($this->groupsRealm())+1) === $this->groupsRealm() . ':') {
+				$gNSS = substr($gNSS, strlen($this->groupsRealm())+2);
+				if (substr($gNSS, 0, strlen('group:')) === 'group:') {
+					$gid = substr($gNSS, strlen('group:')+1);
+					$this->logger->debug("Parsed group data: (NS: $gNS NSS: $gid)");
+
+					$group = $this->groupMapper->getGroupID($gid);
+					$g = $this->groupManager->get($group);
+					if ($g) {
+						$g->addUser($user);
+					}
+				}
+			} else {
+				$this->logger->debug("Skipping group " . $gNSS);
+			}
 		}
 	}
 	public function getOpenIdConfiguration(): array {
@@ -96,5 +117,9 @@ class GroupSyncService {
 
 	private function groupsClaim() {
 		return $this->getOpenIdConfiguration()['group-sync']['groups-claim'] ?? 'eduperson_entitlement_extended';
+	}
+
+	private function groupsRealm() {
+		return $this->getOpenIdConfiguration()['group-sync']['groups-realm'] ?? 'cesnet.cz';
 	}
 }
