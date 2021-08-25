@@ -91,7 +91,7 @@ class GroupSyncService {
 			$gRQF = $groupAttrs->getRQF();
 
 			if (substr($gNSS, 0, strlen($this->groupsRealm())+1) === $this->groupsRealm() . ':') {
-				$gNSS = substr($gNSS, strlen($this->groupsRealm())+2);
+				$gNSS = substr($gNSS, strlen($this->groupsRealm())+1);
 				if (substr($gNSS, 0, strlen('group:')) === 'group:') {
 					$gid = substr($gNSS, strlen('group:')+1);
 					$this->logger->debug("Parsed group data: (NS: $gNS NSS: $gid)");

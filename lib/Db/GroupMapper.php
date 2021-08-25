@@ -86,7 +86,7 @@ class GroupMapper extends Mapper
 			);
 			return null;
 		}
-		return $group->getOcGroupId();
+		return $group;
 	}
 
 

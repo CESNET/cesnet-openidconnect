@@ -22,16 +22,24 @@
 namespace OCA\CesnetOpenIdConnect\Command;
 
 use OCA\CesnetOpenIdConnect\Db\GroupMapper;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
 
-class LinkExternalGroup extends Command
+class UnlinkExternalGroup extends Command
 {
 	/**
 	 * @var GroupMapper
 	 */
 	private $groupMapper;
 
-	public function __construct($groupMapper)
+	/**
+	 * @param GroupMapper $groupMapper
+	 */
+	public function __construct(GroupMapper $groupMapper)
 	{
 		$this->groupMapper = $groupMapper;
 		parent::__construct();

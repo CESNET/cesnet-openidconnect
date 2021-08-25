@@ -23,6 +23,11 @@ namespace OCA\CesnetOpenIdConnect\Command;
 
 use OCA\CesnetOpenIdConnect\Db\GroupMapper;
 use OCP\IGroupManager;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
 
 class LinkExternalGroup extends Command
@@ -37,7 +42,11 @@ class LinkExternalGroup extends Command
 	 */
 	private $groupManager;
 
-	public function __construct($groupMapper, $groupManager)
+	/**
+	 * @param $groupMapper
+	 * @param $groupManager
+	 */
+	public function __construct(GroupMapper $groupMapper, IGroupManager $groupManager)
 	{
 		$this->groupMapper = $groupMapper;
 		$this->groupManager = $groupManager;
@@ -76,7 +85,7 @@ class LinkExternalGroup extends Command
 
 			if (!$this->groupManager->groupExists($target)) {
 				if ($createMissing) {
-					$this->groupMapper->createGroup($target);
+					$this->groupManager->createGroup($target);
 				} else {
 					throw new \Exception('Target ownCloud group does not exist. Use --create-missing.');
 				}
