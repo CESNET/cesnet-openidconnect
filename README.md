@@ -68,6 +68,8 @@ $CONFIG = [
       'groups-claim' => 'eduperson_entitlement_extended',
       // synchronize groups from this realm only (e.g. with URNs starting with `urn:geant:cesnet.cz:...`)
       'groups-realm' => 'cesnet.cz',
+      // list of protected groups that shouldn't be synchronized in any way
+      'protected-groups' => ['admin']
     ]
   ]
 ]

@@ -108,12 +108,16 @@ class GroupSyncService
 					$this->logger->debug("Parsed group data: (NS: $gNS NSS: $gid)");
 
 					$group = $this->groupMapper->getGroupID($gid);
+					if (in_array($group, $this->protectedGroups(), true)) {
+						$this->logger->warning("Group: " . $group . " is PROTECTED. Not adding...");
+						continue;
+					}
+
 					$g = $this->groupManager->get($group);
 					if ($g) {
-						$this->logger->info("Adding2: " . $user->getUID() . " to: ". $g->getGID());
 						$externalGroups[] = $g;
 						if (!$g->inGroup($user)) {
-							$this->logger->info("Adding: " . $user->getUID() . " to: ". $g->getGID());
+							$this->logger->info("Adding: " . $user->getUID() . " to: " . $g->getGID());
 							$g->addUser($user);
 						}
 					} else {
@@ -130,9 +134,33 @@ class GroupSyncService
 		// Remove user from removed groups
 		$groupsToRemoveFrom = array_udiff($internalGroups, $externalGroups, array($this, 'compareGroups'));
 		foreach ($groupsToRemoveFrom as $g) {
-			$this->logger->info("Removing: " . $user->getUID() . " from: ". $g->getGID());
+			if (in_array($g->getGID(), $this->protectedGroups(), true)) {
+				$this->logger->warning("Group: " . $g->getGID() . " is PROTECTED. Not removing...");
+				continue;
+			}
+			$this->logger->info("Removing: " . $user->getUID() . " from: " . $g->getGID());
 			$g->removeUser($user);
 		}
+	}
+
+	public function enabled(): bool
+	{
+		return $this->getOpenIdConfiguration()['group-sync']['enabled'] ?? false;
+	}
+
+	public function getOpenIdConfiguration(): array
+	{
+		return $this->config->getSystemValue('openid-connect', null) ?? [];
+	}
+
+	private function groupsClaim()
+	{
+		return $this->getOpenIdConfiguration()['group-sync']['groups-claim'] ?? 'eduperson_entitlement_extended';
+	}
+
+	private function groupsRealm()
+	{
+		return $this->getOpenIdConfiguration()['group-sync']['groups-realm'] ?? 'cesnet.cz';
 	}
 
 	private function getGroup($g): IGroup
@@ -158,23 +186,8 @@ class GroupSyncService
 		}
 	}
 
-	public function enabled(): bool
+	private function protectedGroups(): array
 	{
-		return $this->getOpenIdConfiguration()['group-sync']['enabled'] ?? false;
-	}
-
-	public function getOpenIdConfiguration(): array
-	{
-		return $this->config->getSystemValue('openid-connect', null) ?? [];
-	}
-
-	private function groupsClaim()
-	{
-		return $this->getOpenIdConfiguration()['group-sync']['groups-claim'] ?? 'eduperson_entitlement_extended';
-	}
-
-	private function groupsRealm()
-	{
-		return $this->getOpenIdConfiguration()['group-sync']['groups-realm'] ?? 'cesnet.cz';
+		return $this->getOpenIdConfiguration()['group-sync']['protected-groups'] ?? array('admin');
 	}
 }
