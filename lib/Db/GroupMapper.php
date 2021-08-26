@@ -97,10 +97,10 @@ class GroupMapper extends Mapper
 	 *
 	 * @return ?Group ownCloud internal group associated with UUID
 	 *
-	 * @return ?Group Group DB entity
+	 * @return ?string Group GID
 	 * or null if not found
 	 */
-	public function getGroupID($oidcGroupUuid): ?Group
+	public function getGroupID(string $oidcGroupUuid): ?string
 	{
 		$group = $this->get($oidcGroupUuid);
 		if ($group) {

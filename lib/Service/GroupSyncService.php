@@ -28,6 +28,7 @@ use OC\User\LoginException;
 use OCP\Http\Client\IClientService;
 use OCP\IAvatarManager;
 use OCP\IConfig;
+use OCP\IGroup;
 use OCP\IGroupManager;
 use OCP\ILogger;
 use OCP\IUser;
@@ -103,19 +104,20 @@ class GroupSyncService
 			if (substr($gNSS, 0, strlen($this->groupsRealm()) + 1) === $this->groupsRealm() . ':') {
 				$gNSS = substr($gNSS, strlen($this->groupsRealm()) + 1);
 				if (substr($gNSS, 0, strlen('group:')) === 'group:') {
-					$gid = substr($gNSS, strlen('group:') + 1);
+					$gid = substr($gNSS, strlen('group:'));
 					$this->logger->debug("Parsed group data: (NS: $gNS NSS: $gid)");
 
 					$group = $this->groupMapper->getGroupID($gid);
 					$g = $this->groupManager->get($group);
 					if ($g) {
+						$this->logger->info("Adding2: " . $user->getUID() . " to: ". $g->getGID());
 						$externalGroups[] = $g;
 						if (!$g->inGroup($user)) {
 							$this->logger->info("Adding: " . $user->getUID() . " to: ". $g->getGID());
 							$g->addUser($user);
 						}
 					} else {
-						$this->logger->warning("Group " . $group . "(" . $groupURN . ") doesn't exist. Skipping...");
+						$this->logger->warning("Group " . $gid . "(" . $groupURN . ") doesn't exist. Skipping...");
 					}
 				}
 			} else {
@@ -123,21 +125,29 @@ class GroupSyncService
 			}
 		}
 
-		$internalGroups = $this->groupManager->getUserGroupIds($user);
+		$internalGroups = array_map(array($this, 'getGroup'), $this->groupManager->getUserGroupIds($user));
+
 		// Remove user from removed groups
 		$groupsToRemoveFrom = array_udiff($internalGroups, $externalGroups, array($this, 'compareGroups'));
-		$this->logger->debug("Groups to remove from " . $groupsToRemoveFrom);
-
 		foreach ($groupsToRemoveFrom as $g) {
 			$this->logger->info("Removing: " . $user->getUID() . " from: ". $g->getGID());
 			$g->removeUser($user);
 		}
 	}
 
-	public function compareGroups($g1, $g2): int
+	private function getGroup($g): IGroup
 	{
-		$a = $g1->getGID();
-		$b = $g2->getGID();
+		return $this->groupManager->get($g);
+	}
+
+	private function compareGroups($a, $b): int
+	{
+		if ($a instanceof IGroup) {
+			$a = $a->getGID();
+		}
+		if ($b instanceof IGroup) {
+			$b = $b->getGID();
+		}
 
 		if ($a == $b) {
 			return 0;
