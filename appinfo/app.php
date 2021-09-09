@@ -20,7 +20,6 @@
  *
  */
 
-use OC;
 use OCA\CesnetOpenIdConnect\Application;
 
 // @codeCoverageIgnoreStart
