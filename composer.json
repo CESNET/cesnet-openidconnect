@@ -4,6 +4,8 @@
     "description": "CESNET OpenId Connect app for ownCloud",
     "require": {
         "php": ">=7.1",
+        "tobias/urn": "dev-master",
+        "ext-intl": "*",
         "jumbojett/openid-connect-php": "^0.9.0"
     },
     "require-dev": {

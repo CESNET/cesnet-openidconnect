@@ -79,7 +79,7 @@ dist: composer distdir sign package
 
 .PHONY: composer
 composer:
-	$(COMPOSER_BIN) install --no-dev
+	$(COMPOSER_BIN) install --no-dev --ignore-platform-reqs
 
 .PHONY: distdir
 distdir:

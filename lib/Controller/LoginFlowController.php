@@ -27,6 +27,7 @@ use OC\User\LoginException;
 use OC\User\Session;
 use OCA\CesnetOpenIdConnect\Client;
 use OCA\CesnetOpenIdConnect\Logger;
+use OCA\CesnetOpenIdConnect\Service\GroupSyncService;
 use OCA\CesnetOpenIdConnect\Service\UserLookupService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
@@ -50,6 +51,10 @@ class LoginFlowController extends Controller {
 	 */
 	private $userLookup;
 	/**
+	 * @var GroupSyncService
+	 */
+	private $groupSyncService;
+	/**
 	 * @var Session
 	 */
 	private $userSession;
@@ -69,6 +74,7 @@ class LoginFlowController extends Controller {
 	public function __construct(string $appName,
 								IRequest $request,
 								UserLookupService $userLookup,
+								GroupSyncService $groupSyncService,
 								IUserSession $userSession,
 								ISession $session,
 								ILogger $logger,
@@ -82,6 +88,7 @@ class LoginFlowController extends Controller {
 
 		$this->session = $session;
 		$this->userLookup = $userLookup;
+		$this->groupSyncService = $groupSyncService;
 		$this->userSession = $userSession;
 		$this->client = $client;
 		$this->logger = new Logger($logger);
@@ -146,6 +153,9 @@ class LoginFlowController extends Controller {
 		}
 
 		$user = $this->userLookup->lookupUser($userInfo);
+		if ($this->groupSyncService->enabled()) {
+			$this->groupSyncService->syncUserGroups($user, $userInfo);
+		}
 
 		// trigger login process
 		if ($this->userSession->createSessionToken($this->request, $user->getUID(), $user->getUID()) &&
