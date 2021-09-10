@@ -33,6 +33,7 @@ use OCP\IGroupManager;
 use OCP\ILogger;
 use OCP\IUser;
 use OCP\IUserManager;
+use Tobias\Urn\Exception\ParserException;
 use Tobias\Urn\RFC8141\Parser;
 
 class GroupSyncService
@@ -96,13 +97,29 @@ class GroupSyncService
 
 		// Add user to newly added groups
 		foreach ($groupURNs as $groupURN) {
-			$groupAttrs = $this->urnParser->parse('urn:' . substr($groupURN, 4));
+			// We expect a valid URN to be: urn:$gNS:$gNSS?=$gRQF
+			try {
+				$groupAttrs = $this->urnParser->parse('urn:' . substr($groupURN, 4));
+			} catch (ParserException $e) {
+				$this->logger->warning($groupURN . " is not a valid RFC8141 URN: " . $e->getMessage());
+				continue;
+			}
 			$gNS = $groupAttrs->getNamespaceIdentifier();
 			$gNSS = $groupAttrs->getNamespaceSpecificString();
 			$gRQF = $groupAttrs->getRQF();
 
-			if (substr($gNSS, 0, strlen($this->groupsRealm()) + 1) === $this->groupsRealm() . ':') {
+			// Check that group namespace and realm matches the configured values, skip it otherwise
+			if (($gNS === $this->groupsNS()) &&
+				(substr($gNSS, 0, strlen($this->groupsRealm()) + 1) === $this->groupsRealm() . ':')) {
 				$gNSS = substr($gNSS, strlen($this->groupsRealm()) + 1);
+
+				/**
+				 * Try po parse group UUID from the 'group:' attribute following the realm field in $gNSS.
+				 * Skip everything else not starting with this attribute.
+				 *
+				 * If we find an ownCloud group mapping for a given group UUID, make sure
+				 * the user is a member of the target ownCloud group.
+				 **/
 				if (substr($gNSS, 0, strlen('group:')) === 'group:') {
 					$gid = substr($gNSS, strlen('group:'));
 					$this->logger->debug("Parsed group data: (NS: $gNS NSS: $gid)");
@@ -131,7 +148,13 @@ class GroupSyncService
 
 		$internalGroups = array_map(array($this, 'getGroup'), $this->groupManager->getUserGroupIds($user));
 
-		// Remove user from removed groups
+		/**
+		 * Compare the current groups the user is a member of with the external groups coming from the groupsClaim.
+		 * At this point, the user is already a member of all groups from the current external groups list, plus
+		 * any groups before the sync was run.
+		 *
+		 * Remove user from groups that are no longer present in the external groups list.
+		 **/
 		$groupsToRemoveFrom = array_udiff($internalGroups, $externalGroups, array($this, 'compareGroups'));
 		foreach ($groupsToRemoveFrom as $g) {
 			if (in_array($g->getGID(), $this->protectedGroups(), true)) {
@@ -156,6 +179,11 @@ class GroupSyncService
 	private function groupsClaim()
 	{
 		return $this->getOpenIdConfiguration()['group-sync']['groups-claim'] ?? 'eduperson_entitlement_extended';
+	}
+
+	private function groupsNS()
+	{
+		return $this->getOpenIdConfiguration()['group-sync']['groups-namespace'] ?? 'geant';
 	}
 
 	private function groupsRealm()

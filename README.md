@@ -66,6 +66,8 @@ $CONFIG = [
       'enabled' => true,
       // defines the claim which holds the user's external groups
       'groups-claim' => 'eduperson_entitlement_extended',
+      // synchronize groups from this namespace (e.g. with URNs starting with `urn:geant:...`)
+      'groups-namespace' => 'geant',
       // synchronize groups from this realm only (e.g. with URNs starting with `urn:geant:cesnet.cz:...`)
       'groups-realm' => 'cesnet.cz',
       // list of protected groups that shouldn't be synchronized in any way
