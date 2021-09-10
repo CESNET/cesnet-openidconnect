@@ -109,7 +109,7 @@ class GroupSyncService
 			$gRQF = $groupAttrs->getRQF();
 
 			// Check that group namespace and realm matches the configured values, skip it otherwise
-			if (($gNS === $this->groupsNS()) &&
+			if (($gNS->toString() === $this->groupsNS()) &&
 				(substr($gNSS, 0, strlen($this->groupsRealm()) + 1) === $this->groupsRealm() . ':')) {
 				$gNSS = substr($gNSS, strlen($this->groupsRealm()) + 1);
 
@@ -142,7 +142,7 @@ class GroupSyncService
 					}
 				}
 			} else {
-				$this->logger->debug("Skipping group " . $gNSS);
+				$this->logger->debug("Skipping group " . $gNS->toString() . ':' . $gNSS);
 			}
 		}
 
