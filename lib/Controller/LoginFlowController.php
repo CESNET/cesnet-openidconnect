@@ -21,7 +21,7 @@
  */
 namespace OCA\CesnetOpenIdConnect\Controller;
 
-use Jumbojett\OpenIDConnectClientException;
+use JuliusPC\OpenIDConnectClientException;
 use OC\HintException;
 use OC\User\LoginException;
 use OC\User\Session;
@@ -71,15 +71,16 @@ class LoginFlowController extends Controller {
 	 */
 	private $memCacheFactory;
 
-	public function __construct(string $appName,
-								IRequest $request,
-								UserLookupService $userLookup,
-								GroupSyncService $groupSyncService,
-								IUserSession $userSession,
-								ISession $session,
-								ILogger $logger,
-								Client $client,
-								ICacheFactory $memCacheFactory
+	public function __construct(
+		string $appName,
+		IRequest $request,
+		UserLookupService $userLookup,
+		GroupSyncService $groupSyncService,
+		IUserSession $userSession,
+		ISession $session,
+		ILogger $logger,
+		Client $client,
+		ICacheFactory $memCacheFactory
 	) {
 		parent::__construct($appName, $request);
 		if (!$userSession instanceof Session) {
@@ -117,7 +118,7 @@ class LoginFlowController extends Controller {
 	 * @UseSession
 	 *
 	 * @throws HintException
-	 * @throws \Jumbojett\OpenIDConnectClientException
+	 * @throws OpenIDConnectClientException
 	 * @throws LoginException
 	 */
 	public function login(): RedirectResponse {
@@ -153,6 +154,7 @@ class LoginFlowController extends Controller {
 		}
 
 		$user = $this->userLookup->lookupUser($userInfo);
+
 		if ($this->groupSyncService->enabled()) {
 			$this->groupSyncService->syncUserGroups($user, $userInfo);
 		}
@@ -175,7 +177,15 @@ class LoginFlowController extends Controller {
 			} else {
 				$this->logger->debug('Id token holds no sid: ' . \json_encode($openid->getIdTokenPayload()));
 			}
-			return new RedirectResponse($this->getDefaultUrl());
+			$response = new RedirectResponse($this->getDefaultUrl());
+			$openIdConfig = $openid->getOpenIdConfig();
+			$cookieName = $openIdConfig['ocis-routing-policy-cookie'] ?? 'owncloud-selector';
+			$cookieDirectives = $openIdConfig['ocis-routing-policy-cookie-directives'] ?? 'path=/;';
+			$attribute = $openIdConfig['ocis-routing-poclicy-claim'] ?? 'ocis.routing.policy';
+			if (\property_exists($userInfo, $attribute)) {
+				$response->addHeader('Set-Cookie', "$cookieName={$userInfo->$attribute};$cookieDirectives");
+			}
+			return $response;
 		}
 		$this->logger->error("Unable to login {$user->getUID()}");
 		return new RedirectResponse('/');

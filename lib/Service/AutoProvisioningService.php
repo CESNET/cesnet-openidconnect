@@ -22,10 +22,10 @@
  */
 namespace OCA\CesnetOpenIdConnect\Service;
 
+use OCA\CesnetOpenIdConnect\Client;
 use OC\User\LoginException;
 use OCP\Http\Client\IClientService;
 use OCP\IAvatarManager;
-use OCP\IConfig;
 use OCP\IGroupManager;
 use OCP\ILogger;
 use OCP\IUser;
@@ -50,26 +50,28 @@ class AutoProvisioningService {
 	 */
 	private $logger;
 	/**
-	 * @var IConfig
-	 */
-	private $config;
-	/**
 	 * @var IClientService
 	 */
 	private $clientService;
+	/**
+	 * @var Client
+	 */
+	private $client;
 
-	public function __construct(IUserManager $userManager,
-								IGroupManager $groupManager,
-								IAvatarManager $avatarManager,
-								IClientService $clientService,
-								ILogger $logger,
-								IConfig $config) {
+	public function __construct(
+		IUserManager $userManager,
+		IGroupManager $groupManager,
+		IAvatarManager $avatarManager,
+		IClientService $clientService,
+		ILogger $logger,
+		Client $client
+	) {
 		$this->userManager = $userManager;
 		$this->groupManager = $groupManager;
 		$this->avatarManager = $avatarManager;
 		$this->logger = $logger;
-		$this->config = $config;
 		$this->clientService = $clientService;
+		$this->client = $client;
 	}
 
 	public function createUser($userInfo): IUser {
@@ -81,9 +83,12 @@ class AutoProvisioningService {
 		if (!$emailOrUserId) {
 			throw new LoginException("Configured attribute $attribute is not known.");
 		}
-		$userId = $this->mode() === 'email' ? $this->generateUserId() : $emailOrUserId;
 
 		$openIdConfig = $this->getOpenIdConfiguration();
+
+		$stripUserIdDomain = $openIdConfig['auto-provision']['strip-userid-domain'] ?? false;
+		$userId = $this->mode() === 'email' ? $this->generateUserId() : $stripUserIdDomain ? \strstr($emailOrUserId, '@', true) : $emailOrUserId;;
+
 		$provisioningClaim = $openIdConfig['auto-provision']['provisioning-claim'] ?? null;
 		if ($provisioningClaim) {
 			$this->logger->debug('ProvisioningClaim is defined for auto-provision', ['claim' => $provisioningClaim]);
@@ -98,17 +103,7 @@ class AutoProvisioningService {
 			}
 		}
 
-		if ($this->mode() === 'email') {
-			$userId = \uniqid('oidc-user-');
-			$email = $emailOrUserId;
-		} else {
-			$stripUserIdDomain = $openIdConfig['auto-provision']['strip-userid-domain'] ?? false;
-
-			$userId = $stripUserIdDomain ? \strstr($emailOrUserId, '@', true): $emailOrUserId;
-			$email = null;
-		}
-
-		$passwd = \uniqid('', true);
+		$email = $this->mode() === 'email' ? $emailOrUserId: null;
 		$user = $this->userManager->createUser($userId, $this->generatePassword());
 		if (!$user) {
 			throw new LoginException("Unable to create user $userId");
@@ -152,7 +147,7 @@ class AutoProvisioningService {
 		return $user;
 	}
 	public function getOpenIdConfiguration(): array {
-		return $this->config->getSystemValue('openid-connect', null) ?? [];
+		return $this->client->getOpenIdConfig() ?? [];
 	}
 
 	public function enabled(): bool {
@@ -167,16 +162,15 @@ class AutoProvisioningService {
 		return $this->getOpenIdConfiguration()['search-attribute'] ?? 'email';
 	}
 
-	protected function downloadPicture(string $pictureUrl) {
-		$response = $this->clientService->newClient()->get($pictureUrl);
-		return $response->getBody();
+	protected function downloadPicture(string $pictureUrl): string {
+		return $this->clientService->newClient()->get($pictureUrl)->getBody();
 	}
 
-	private function generateUserId() {
+	private function generateUserId(): string {
 		return 'oidc-user-'.\bin2hex(\random_bytes(16));
 	}
 
-	private function generatePassword() {
+	private function generatePassword(): string {
 		return \bin2hex(\random_bytes(32));
 	}
 }

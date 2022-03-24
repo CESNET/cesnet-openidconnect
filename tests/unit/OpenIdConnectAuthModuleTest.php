@@ -22,7 +22,7 @@
 
 namespace OCA\CesnetOpenIdConnect\Tests\Unit;
 
-use Jumbojett\OpenIDConnectClientException;
+use JuliusPC\OpenIDConnectClientException;
 use OC\Memcache\ArrayCache;
 use OC\User\LoginException;
 use OCA\CesnetOpenIdConnect\Client;

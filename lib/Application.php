@@ -23,12 +23,14 @@ namespace OCA\CesnetOpenIdConnect;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Jumbojett\OpenIDConnectClientException;
+use JuliusPC\OpenIDConnectClientException;
 use OC;
 use OC\HintException;
 use OCP\AppFramework\App;
 
 class Application extends App {
+	public const APPID = 'cesnet-openidconnect';
+
 	/** @var Logger */
 	private $logger;
 
@@ -39,7 +41,7 @@ class Application extends App {
 	 * @codeCoverageIgnore
 	 */
 	public function __construct(array $urlParams = []) {
-		parent::__construct('cesnet-openidconnect', $urlParams);
+		parent::__construct(Application::APPID, $urlParams);
 	}
 
 	/**
@@ -71,10 +73,8 @@ class Application extends App {
 
 		// Add event listener
 		$dispatcher = $server->getEventDispatcher();
-
-//		TODO: Uncomment this to enable OpenIDConnect support for ownCloud clients
-//		$eventHandler = new EventHandler($dispatcher, $request, $userSession, $session);
-//		$eventHandler->registerEventHandler();
+		$eventHandler = new EventHandler($dispatcher, $request, $userSession, $session);
+		$eventHandler->registerEventHandler();
 
 		// verify the session
 		$sessionVerifier = new SessionVerifier($this->logger, $session, $userSession, $memCacheFactory, $dispatcher, $client);

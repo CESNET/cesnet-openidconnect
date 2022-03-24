@@ -52,11 +52,13 @@ class UserLookupService {
      */
     private $idMapper;
 
-	public function __construct(IUserManager $userManager,
-								Client $client,
-								AutoProvisioningService $autoProvisioningService,
-								ILogger $logger,
-								IdentityMapper $idMapper) {
+	public function __construct(
+		IUserManager $userManager,
+		Client $client,
+		AutoProvisioningService $autoProvisioningService,
+		ILogger $logger,
+		IdentityMapper $idMapper
+	) {
 		$this->userManager = $userManager;
 		$this->client = $client;
 		$this->autoProvisioningService = $autoProvisioningService;
