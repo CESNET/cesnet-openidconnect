@@ -88,15 +88,10 @@ class GroupSyncService
 			throw new LoginException('User data is missing.');
 		}
 
-		$groupsClaim = $this->groupsClaim();
-		if (!$groupsClaim) {
-			throw new LoginException('Groups claim must be configured for group sync.');
-		}
-		$groupURNs = $userInfo->$groupsClaim;
 		$externalGroups = array();
 
 		// Add user to newly added groups
-		foreach ($groupURNs as $groupURN) {
+		foreach ($this->groupURNs($userInfo) as $groupURN) {
 			// We expect a valid URN to be: urn:$gNS:$gNSS?=$gRQF
 			try {
 				$groupAttrs = $this->urnParser->parse('urn:' . substr($groupURN, 4));
@@ -174,6 +169,15 @@ class GroupSyncService
 	public function getOpenIdConfiguration(): array
 	{
 		return $this->config->getSystemValue('openid-connect', null) ?? [];
+	}
+
+	public function groupURNs($userInfo): array
+	{
+		$groupsClaim = $this->groupsClaim();
+		if (!$groupsClaim) {
+			throw new LoginException('Groups claim must be configured for group sync.');
+		}
+		return $userInfo->$groupsClaim;
 	}
 
 	private function groupsClaim()
