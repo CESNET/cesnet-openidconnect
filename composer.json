@@ -15,7 +15,7 @@
             "bin-links": false
         }
     },
-    "license": "AGPL",
+    "license": "GPLv2",
     "authors": [
         {
             "name": "Thomas Müller",
