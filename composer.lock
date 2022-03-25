@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3296d0acc53e32420e8c631d8f987d91",
+    "content-hash": "f5e4cc25e79d9ad2e2522e1223d2021b",
     "packages": [
         {
             "name": "juliuspc/openid-connect-php",

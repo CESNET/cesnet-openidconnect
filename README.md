@@ -30,7 +30,7 @@ If you run a clustered setup, the following method is preferred because it is st
 
 The _key->value_ pairs are the same as when storing them to the `config.php` file. The preferred method is using the occ command:
 ```
-occ config:app:set openidconnect openid-connect \
+occ config:app:set cesnet-openidconnect openid-connect \
 --value='{"provider-url":"https:\/\/idp.example.net","client-id":"fc9b5c78-ec73-47bf-befc-59d4fe780f6f","client-secret":"e3e5b04a-3c3c-4f4d-b16c-2a6e9fdd3cd1","loginButtonName":"Login via OpenId Connect"}'
 ```
 
