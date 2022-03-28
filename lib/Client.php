@@ -21,6 +21,8 @@
  */
 namespace OCA\CesnetOpenIdConnect;
 
+use OCA\CesnetOpenIdConnect\Service\GroupSyncService;
+
 use JuliusPC\OpenIDConnectClient;
 use JuliusPC\OpenIDConnectClientException;
 use OCP\IConfig;
@@ -38,7 +40,10 @@ class Client extends OpenIDConnectClient {
 	private $wellKnownConfig;
 	/** @var ILogger */
 	private $logger;
-
+	/**
+	 * @var GroupSyncService
+	 */
+	private $groupSyncService;
 	/**
 	 * @var IURLGenerator
 	 */
@@ -56,12 +61,14 @@ class Client extends OpenIDConnectClient {
 		IConfig $config,
 		IURLGenerator $generator,
 		ISession $session,
-		ILogger $logger
+		ILogger $logger,
+		GroupSyncService $groupSyncService
 	) {
 		$this->session = $session;
 		$this->config = $config;
 		$this->generator = $generator;
 		$this->logger = $logger;
+		$this->groupSyncService = $groupSyncService;
 
 		$openIdConfig = $this->getOpenIdConfig();
 		if ($openIdConfig === null) {
@@ -138,6 +145,13 @@ class Client extends OpenIDConnectClient {
 			$eligibleExpiry = \strtotime($openIdConfig['eligible-expiry'] ?? '-1 year');
 
 			if (!$eligibleTimestamp or $eligibleTimestamp < $eligibleExpiry) {
+				if (isset($openIdConfig['eligible-exception-urn']) && $openIdConfig['eligible-exception-urn']) {
+					$eligibleException = $openIdConfig['eligible-exception-urn'];
+					$groupUrns = $this->groupSyncService->groupURNs($userInfo);
+					if (\in_array($eligibleException, $groupUrns, true)) {
+						return true;
+					}
+				}
 				return false;
 			}
 		}

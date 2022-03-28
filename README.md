@@ -158,7 +158,7 @@ $CONFIG = [
 - use-access-token-payload-for-user-info - if set to true any user information will be read from the access token. If set to false the userinfo endpoint is used (starting app version 1.1.0)
 - eligible-timestamp-claim - defines the claim which holds the timestamp of user's last login to IdP using an identity eligible to access the services
 - eligible-expiry - an expiration period against which the user's eligible timestamp is checked upon login (defaults to 365 days)
-
+- eligible-exception-urn - a full URN of group resource capability, representing a granted exception from user's eligibility requirements
 ### Setup within the OpenId Provider
 When registering ownCloud as OpenId Client use ```https://cloud.example.net/index.php/apps/openidconnect/redirect``` as redirect url .
 
