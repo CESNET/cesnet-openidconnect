@@ -22,7 +22,7 @@
  */
 namespace OCA\OpenIdConnect\Service;
 
-use OCA\OpenIdConnect\Client;
+use OCA\CesnetOpenIdConnect\Client;
 use OC\User\LoginException;
 use OCP\ILogger;
 use OCP\IUser;

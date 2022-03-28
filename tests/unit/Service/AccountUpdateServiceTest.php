@@ -20,11 +20,11 @@
  *
  */
 
-namespace OCA\OpenIdConnect\Tests\Unit\Service;
+namespace OCA\CesnetOpenIdConnect\Tests\Unit\Service;
 
 use OC\User\LoginException;
-use OCA\OpenIdConnect\Client;
-use OCA\OpenIdConnect\Service\AccountUpdateService;
+use OCA\CesnetOpenIdConnect\Client;
+use OCA\CesnetOpenIdConnect\Service\AccountUpdateService;
 use OCP\ILogger;
 use OCP\IUser;
 use PHPUnit\Framework\MockObject\MockObject;
