@@ -10,5 +10,7 @@ vendor-bin/**/composer.lock
 # SonarCloud scanner
 .scannerwork
 
+.idea
+
 # Generated from .drone.star
 .drone.yml

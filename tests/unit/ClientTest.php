@@ -20,9 +20,9 @@
  *
  */
 
-namespace OCA\OpenIdConnect\Tests\Unit;
+namespace OCA\CesnetOpenIdConnect\Tests\Unit;
 
-use OCA\OpenIdConnect\Client;
+use OCA\CesnetOpenIdConnect\Client;
 use OCP\IConfig;
 use OCP\ISession;
 use OCP\IURLGenerator;

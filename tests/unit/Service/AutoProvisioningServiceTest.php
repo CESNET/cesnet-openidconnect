@@ -20,12 +20,12 @@
  *
  */
 
-namespace OCA\OpenIdConnect\Tests\Unit\Service;
+namespace OCA\CesnetOpenIdConnect\Tests\Unit\Service;
 
 use OC\User\LoginException;
-use OCA\OpenIdConnect\Client;
-use OCA\OpenIdConnect\Service\AccountUpdateService;
-use OCA\OpenIdConnect\Service\AutoProvisioningService;
+use OCA\CesnetOpenIdConnect\Service\AccountUpdateService;
+use OCA\CesnetOpenIdConnect\Service\AutoProvisioningService;
+use OCA\CesnetOpenIdConnect\Client;
 use OCP\Http\Client\IClient;
 use OCP\Http\Client\IClientService;
 use OCP\Http\Client\IResponse;

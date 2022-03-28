@@ -20,15 +20,15 @@
  *
  */
 
-namespace OCA\OpenIdConnect\Tests\Unit;
+namespace OCA\CesnetOpenIdConnect\Tests\Unit;
 
 use JuliusPC\OpenIDConnectClientException;
 use OC\Memcache\ArrayCache;
 use OC\User\LoginException;
-use OCA\OpenIdConnect\Client;
-use OCA\OpenIdConnect\OpenIdConnectAuthModule;
-use OCA\OpenIdConnect\Service\AccountUpdateService;
-use OCA\OpenIdConnect\Service\UserLookupService;
+use OCA\CesnetOpenIdConnect\Client;
+use OCA\CesnetOpenIdConnect\Service\AccountUpdateService;
+use OCA\CesnetOpenIdConnect\OpenIdConnectAuthModule;
+use OCA\CesnetOpenIdConnect\Service\UserLookupService;
 use OCP\ICacheFactory;
 use OCP\ILogger;
 use OCP\IRequest;

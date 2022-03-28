@@ -19,7 +19,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\OpenIdConnect;
+namespace OCA\CesnetOpenIdConnect;
+
+use OCA\CesnetOpenIdConnect\Service\GroupSyncService;
 
 use JuliusPC\OpenIDConnectClient;
 use JuliusPC\OpenIDConnectClientException;
@@ -38,7 +40,10 @@ class Client extends OpenIDConnectClient {
 	private $wellKnownConfig;
 	/** @var ILogger */
 	private $logger;
-
+	/**
+	 * @var GroupSyncService
+	 */
+	private $groupSyncService;
 	/**
 	 * @var IURLGenerator
 	 */
@@ -56,12 +61,14 @@ class Client extends OpenIDConnectClient {
 		IConfig $config,
 		IURLGenerator $generator,
 		ISession $session,
-		ILogger $logger
+		ILogger $logger,
+		GroupSyncService $groupSyncService
 	) {
 		$this->session = $session;
 		$this->config = $config;
 		$this->generator = $generator;
 		$this->logger = $logger;
+		$this->groupSyncService = $groupSyncService;
 
 		$openIdConfig = $this->getOpenIdConfig();
 		if ($openIdConfig === null) {
@@ -189,6 +196,27 @@ class Client extends OpenIDConnectClient {
 		return null;
 	}
 
+	public function checkEligible($userInfo): bool {
+		$openIdConfig = $this->getOpenIdConfig();
+		if (isset($openIdConfig['eligible-timestamp-claim']) && $openIdConfig['eligible-timestamp-claim']) {
+			$eligibleAttribute = $openIdConfig['eligible-timestamp-claim'];
+			$eligibleTimestamp = \strtotime($userInfo->$eligibleAttribute);
+			$eligibleExpiry = \strtotime($openIdConfig['eligible-expiry'] ?? '-1 year');
+
+			if (!$eligibleTimestamp or $eligibleTimestamp < $eligibleExpiry) {
+				if (isset($openIdConfig['eligible-exception-urn']) && $openIdConfig['eligible-exception-urn']) {
+					$eligibleException = $openIdConfig['eligible-exception-urn'];
+					$groupUrns = $this->groupSyncService->groupURNs($userInfo);
+					if (\in_array($eligibleException, $groupUrns, true)) {
+						return true;
+					}
+				}
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public function storeRedirectUrl(?string $redirectUrl): void {
 		if ($redirectUrl) {
 			$this->setSessionKey('openid_connect_redirect_url', $redirectUrl);
@@ -254,7 +282,7 @@ class Client extends OpenIDConnectClient {
 	 * @throws OpenIDConnectClientException
 	 */
 	public function authenticate() : bool {
-		$redirectUrl = $this->generator->linkToRouteAbsolute('openidconnect.loginFlow.login');
+		$redirectUrl = $this->generator->linkToRouteAbsolute('cesnet-openidconnect.loginFlow.login');
 
 		$openIdConfig = $this->getOpenIdConfig();
 		if (isset($openIdConfig['redirect-url'])) {

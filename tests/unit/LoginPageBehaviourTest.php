@@ -20,10 +20,10 @@
  *
  */
 
-namespace OCA\OpenIdConnect\Tests\Unit;
+namespace OCA\CesnetOpenIdConnect\Tests\Unit;
 
-use OCA\OpenIdConnect\Logger;
-use OCA\OpenIdConnect\LoginPageBehaviour;
+use OCA\CesnetOpenIdConnect\Logger;
+use OCA\CesnetOpenIdConnect\LoginPageBehaviour;
 use OCP\IRequest;
 use OCP\IURLGenerator;
 use OCP\IUserSession;

@@ -1,8 +1,8 @@
 <?php
 /**
- * @author Thomas Müller <thomas.mueller@tmit.eu>
  *
- * @copyright Copyright (c) 2020, ownCloud GmbH
+ * @author Miroslav Bauer, CESNET <bauer@cesnet.cz>
+ * @copyright Miroslav Bauer, CESNET 2021
  * @license GPL-2.0
  *
  * This program is free software; you can redistribute it and/or
@@ -20,23 +20,18 @@
  *
  */
 
-use OCA\CesnetOpenIdConnect\Application;
+namespace OCA\CesnetOpenIDConnect\Db;
 
-// @codeCoverageIgnoreStart
-(static function () {
-	$excludedUrls = '^/'
-		. '(remote.php'
-		. '|public.php'
-		. '|ocs'
-		. ')';
+use OCP\AppFramework\Db\Entity;
 
-	$excludedRegex = '/' . str_replace('/', '\/', $excludedUrls) . '/i';
+/**
+ * @package OCA\UserOpenIDC\Db\Legacy;
+ */
+class Identity extends Entity
+{
 
-	$app = new Application();
-	$server = $app->getContainer()->getServer();
-	$requestUri = $server->getRequest()->getRequestUri();
-
-	if (!\OC::$CLI && !preg_match($excludedRegex, $requestUri)) {
-		$app->boot();
-	}
-})();
+    protected $oidcUserid;
+    protected $ocUserid;
+    protected $nickname;
+    protected $lastSeen;
+}

@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\OpenIdConnect;
+namespace OCA\CesnetOpenIdConnect;
 
 use OC_App;
 use OCP\IRequest;
@@ -77,7 +77,7 @@ class LoginPageBehaviour {
 
 		$req = $this->request->getRequestUri();
 		$this->logger->debug("Redirecting to IdP - request url: $req");
-		$loginUrl = $this->urlGenerator->linkToRoute('openidconnect.loginFlow.login', $this->request->getParams());
+		$loginUrl = $this->urlGenerator->linkToRoute('cesnet-openidconnect.loginFlow.login', $this->request->getParams());
 		$this->redirect($loginUrl);
 	}
 
@@ -97,7 +97,7 @@ class LoginPageBehaviour {
 	public function registerAlternativeLogin(string $loginName): void {
 		OC_App::registerLogIn([
 			'name' => $loginName,
-			'href' => $this->urlGenerator->linkToRoute('openidconnect.loginFlow.login', $this->request->getParams()),
+			'href' => $this->urlGenerator->linkToRoute('cesnet-openidconnect.loginFlow.login', $this->request->getParams()),
 		]);
 	}
 }

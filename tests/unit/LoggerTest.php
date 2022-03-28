@@ -20,9 +20,9 @@
  *
  */
 
-namespace OCA\OpenIdConnect\Tests\Unit;
+namespace OCA\CesnetOpenIdConnect\Tests\Unit;
 
-use OCA\OpenIdConnect\Logger;
+use OCA\CesnetOpenIdConnect\Logger;
 use OCP\ILogger;
 use PHPUnit\Framework\MockObject\MockObject;
 use Test\TestCase;

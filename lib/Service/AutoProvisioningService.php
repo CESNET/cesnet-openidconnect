@@ -20,9 +20,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\OpenIdConnect\Service;
+namespace OCA\CesnetOpenIdConnect\Service;
 
-use OCA\OpenIdConnect\Client;
+use OCA\CesnetOpenIdConnect\Client;
 use OC\User\LoginException;
 use OCP\Http\Client\IClientService;
 use OCP\IAvatarManager;
@@ -89,9 +89,12 @@ class AutoProvisioningService {
 		if (!$emailOrUserId) {
 			throw new LoginException("Configured attribute $attribute is not known.");
 		}
-		$userId = $this->client->mode() === 'email' ? $this->generateUserId() : $emailOrUserId;
 
 		$openIdConfig = $this->client->getOpenIdConfiguration();
+
+		$stripUserIdDomain = $openIdConfig['auto-provision']['strip-userid-domain'] ?? false;
+		$userId = $this->client->mode() === 'email' ? $this->generateUserId() : $stripUserIdDomain ? \strstr($emailOrUserId, '@', true) : $emailOrUserId;
+
 		$provisioningClaim = $openIdConfig['auto-provision']['provisioning-claim'] ?? null;
 		if ($provisioningClaim) {
 			$this->logger->debug('ProvisioningClaim is defined for auto-provision', ['claim' => $provisioningClaim]);

@@ -20,13 +20,13 @@
  *
  */
 
-namespace OCA\OpenIdConnect\Tests\Unit\Controller;
+namespace OCA\CesnetOpenIdConnect\Tests\Unit\Controller;
 
 use OC\Memcache\ArrayCache;
 use OC\User\Session;
-use OCA\OpenIdConnect\Client;
-use OCA\OpenIdConnect\Controller\LoginFlowController;
-use OCA\OpenIdConnect\Service\UserLookupService;
+use OCA\CesnetOpenIdConnect\Client;
+use OCA\CesnetOpenIdConnect\Controller\LoginFlowController;
+use OCA\CesnetOpenIdConnect\Service\UserLookupService;
 use OCP\ICacheFactory;
 use OCP\ILogger;
 use OCP\IRequest;

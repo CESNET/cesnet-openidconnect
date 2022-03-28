@@ -19,13 +19,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\OpenIdConnect\Service;
+namespace OCA\CesnetOpenIdConnect\Service;
 
 use OC\HintException;
 use OC\User\LoginException;
-use OCA\OpenIdConnect\Client;
+use OCA\CesnetOpenIdConnect\Client;
+use OCA\CesnetOpenIdConnect\Db\IdentityMapper;
 use OCP\IUser;
 use OCP\IUserManager;
+use OCP\ILogger;
 
 class UserLookupService {
 
@@ -41,15 +43,27 @@ class UserLookupService {
 	 * @var AutoProvisioningService
 	 */
 	private $autoProvisioningService;
+	/**
+	 * @var ILogger
+	 */
+	private $logger;
+    /**
+     * @var IdentityMapper
+     */
+    private $idMapper;
 
 	public function __construct(
 		IUserManager $userManager,
 		Client $client,
-		AutoProvisioningService $autoProvisioningService
+		AutoProvisioningService $autoProvisioningService,
+		ILogger $logger,
+		IdentityMapper $idMapper
 	) {
 		$this->userManager = $userManager;
 		$this->client = $client;
 		$this->autoProvisioningService = $autoProvisioningService;
+		$this->logger = $logger;
+		$this->idMapper = $idMapper;
 	}
 
 	/**
@@ -87,12 +101,23 @@ class UserLookupService {
 			$this->validUser($user[0]);
 			return $user[0];
 		}
-		$user = $this->userManager->get($userInfo->$attribute);
+		$stripUserIdDomain = $openIdConfig['auto-provision']['strip-userid-domain'] ?? false;
+		$userName = $stripUserIdDomain? \strstr($userInfo->$attribute, '@', true) : $userInfo->$attribute;
+
+		$user = $this->userManager->get($userName);
 		if (!$user) {
-			if ($this->autoProvisioningService->enabled()) {
-				return $this->autoProvisioningService->createUser($userInfo);
+			$this->logger->debug('UserLookupService::lookupUser : looking up mapping for: ' . $userInfo->$attribute);
+			$userId = $this->idMapper->getOcUserID($userInfo->$attribute);
+			if ($userId) {
+				$user = $this->userManager->get($userId);
+				$this->logger->info(sprintf('UserLookupService::lookupUser : mapped: %s to %s',  $userInfo->$attribute, $user->getUID()));
 			}
-			throw new LoginException("User {$userInfo->$attribute} is not known.");
+			if (!$user) {
+				if ($this->autoProvisioningService->enabled()) {
+					return $this->autoProvisioningService->createUser($userInfo);
+				}
+				throw new LoginException("User {$userInfo->$attribute} is not known.");
+			}
 		}
 		$this->validUser($user);
 		return $user;

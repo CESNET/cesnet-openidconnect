@@ -20,9 +20,9 @@
  *
  */
 
-namespace OCA\OpenIdConnect\Tests\Unit;
+namespace OCA\CesnetOpenIdConnect\Tests\Unit;
 
-use OCA\OpenIdConnect\EventHandler;
+use OCA\CesnetOpenIdConnect\EventHandler;
 use OCP\IRequest;
 use OCP\ISession;
 use OCP\IUserSession;

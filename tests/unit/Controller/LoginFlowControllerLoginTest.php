@@ -20,15 +20,15 @@
  *
  */
 
-namespace OCA\OpenIdConnect\Tests\Unit\Controller;
+namespace OCA\CesnetOpenIdConnect\Tests\Unit\Controller;
 
 use JuliusPC\OpenIDConnectClientException;
 use OC\HintException;
 use OC\User\LoginException;
 use OC\User\Session;
-use OCA\OpenIdConnect\Client;
-use OCA\OpenIdConnect\Controller\LoginFlowController;
-use OCA\OpenIdConnect\Service\UserLookupService;
+use OCA\CesnetOpenIdConnect\Client;
+use OCA\CesnetOpenIdConnect\Controller\LoginFlowController;
+use OCA\CesnetOpenIdConnect\Service\UserLookupService;
 use OCP\AppFramework\Http\RedirectResponse;
 use OCP\ICacheFactory;
 use OCP\ILogger;

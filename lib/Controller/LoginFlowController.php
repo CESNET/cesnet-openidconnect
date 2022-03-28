@@ -19,15 +19,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\OpenIdConnect\Controller;
+namespace OCA\CesnetOpenIdConnect\Controller;
 
 use JuliusPC\OpenIDConnectClientException;
 use OC\HintException;
 use OC\User\LoginException;
 use OC\User\Session;
-use OCA\OpenIdConnect\Client;
-use OCA\OpenIdConnect\Logger;
-use OCA\OpenIdConnect\Service\UserLookupService;
+use OCA\CesnetOpenIdConnect\Client;
+use OCA\CesnetOpenIdConnect\Logger;
+use OCA\CesnetOpenIdConnect\Service\GroupSyncService;
+use OCA\CesnetOpenIdConnect\Service\UserLookupService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\RedirectResponse;
@@ -50,6 +51,10 @@ class LoginFlowController extends Controller {
 	 */
 	private $userLookup;
 	/**
+	 * @var GroupSyncService
+	 */
+	private $groupSyncService;
+	/**
 	 * @var Session
 	 */
 	private $userSession;
@@ -70,6 +75,7 @@ class LoginFlowController extends Controller {
 		string $appName,
 		IRequest $request,
 		UserLookupService $userLookup,
+		GroupSyncService $groupSyncService,
 		IUserSession $userSession,
 		ISession $session,
 		ILogger $logger,
@@ -83,6 +89,7 @@ class LoginFlowController extends Controller {
 
 		$this->session = $session;
 		$this->userLookup = $userLookup;
+		$this->groupSyncService = $groupSyncService;
 		$this->userSession = $userSession;
 		$this->client = $client;
 		$this->logger = new Logger($logger);
@@ -111,6 +118,7 @@ class LoginFlowController extends Controller {
 	 * @UseSession
 	 *
 	 * @throws HintException
+	 * @throws OpenIDConnectClientException
 	 * @throws LoginException
 	 */
 	public function login(): RedirectResponse {
@@ -140,7 +148,16 @@ class LoginFlowController extends Controller {
 		if (!$userInfo) {
 			throw new LoginException('No user information available.');
 		}
+
+		if (!$openid->checkEligible($userInfo)) {
+			throw new LoginException('User is not eligible to access the service.');
+		}
+
 		$user = $this->userLookup->lookupUser($userInfo);
+
+		if ($this->groupSyncService->enabled()) {
+			$this->groupSyncService->syncUserGroups($user, $userInfo);
+		}
 
 		// trigger login process
 		if ($this->userSession->createSessionToken($this->request, $user->getUID(), $user->getUID()) &&

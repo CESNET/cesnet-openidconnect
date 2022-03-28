@@ -30,7 +30,7 @@ If you run a clustered setup, the following method is preferred because it is st
 
 The _key->value_ pairs are the same as when storing them to the `config.php` file. The preferred method is using the occ command:
 ```
-occ config:app:set openidconnect openid-connect \
+occ config:app:set cesnet-openidconnect openid-connect \
 --value='{"provider-url":"https:\/\/idp.example.net","client-id":"fc9b5c78-ec73-47bf-befc-59d4fe780f6f","client-secret":"e3e5b04a-3c3c-4f4d-b16c-2a6e9fdd3cd1","loginButtonName":"Login via OpenId Connect"}'
 ```
 
@@ -89,6 +89,29 @@ $CONFIG = [
 ];
 ```
 
+### Setup group synchronization mode
+The group synchronization mode will automatically synchronize user groups provided in `groups-claim` with
+ownCloud groups upon user's login.
+
+```php
+$CONFIG = [
+  'openid-connect' => [
+    'group-sync' => [
+      // explicit enable the group sync mode
+      'enabled' => true,
+      // defines the claim which holds the user's external groups
+      'groups-claim' => 'eduperson_entitlement_extended',
+      // synchronize groups from this namespace (e.g. with URNs starting with `urn:geant:...`)
+      'groups-namespace' => 'geant',
+      // synchronize groups from this realm only (e.g. with URNs starting with `urn:geant:cesnet.cz:...`)
+      'groups-realm' => 'cesnet.cz',
+      // list of protected groups that shouldn't be synchronized in any way
+      'protected-groups' => ['admin']
+    ]
+  ]
+]
+```
+
 ### Setup auto provisioning mode
 The auto provisioning mode will create a user based on the provided user information as returned by the OpenID Connect provider.
 The config parameters 'mode' and 'search-attribute' will be used to create a unique user so that the lookup mechanism can find the user again.
@@ -106,6 +129,8 @@ $CONFIG = [
       'display-name-claim' => 'given_name', 
       // defines the claim which holds the picture of the user - must be a URL
       'picture-claim' => 'picture', 
+      // useful for cases when userid claim is user@domain and domain is always the same
+      'strip-userid-domain' => false,
       // defines a list of groups to which the newly created user will be added automatically
       'groups' => ['admin', 'guests', 'employees'], 
     ]
@@ -155,8 +180,9 @@ $CONFIG = [
 - search-attribute - the attribute which is taken from the access token JWT or user info endpoint to identify the user
 - allowed-user-backends - limit the users which are allowed to login to a specific user backend - e.g. LDAP
 - use-access-token-payload-for-user-info - if set to true any user information will be read from the access token. If set to false the userinfo endpoint is used (starting app version 1.1.0)
-
-
+- eligible-timestamp-claim - defines the claim which holds the timestamp of user's last login to IdP using an identity eligible to access the services
+- eligible-expiry - an expiration period against which the user's eligible timestamp is checked upon login (defaults to 365 days)
+- eligible-exception-urn - a full URN of group resource capability, representing a granted exception from user's eligibility requirements
 ### Setup within the OpenId Provider
 When registering ownCloud as OpenId Client use ```https://cloud.example.net/index.php/apps/openidconnect/redirect``` as redirect url .
 

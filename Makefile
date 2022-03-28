@@ -14,7 +14,7 @@ PHPSTAN=php -d zend.enable_gc=0 vendor-bin/phpstan/vendor/bin/phpstan
 
 KARMA=$(NODE_PREFIX)/node_modules/.bin/karma
 
-app_name=openidconnect
+app_name=cesnet-openidconnect
 build_dir=$(CURDIR)/build
 dist_dir=$(build_dir)/dist
 src_files=README.md LICENSE
@@ -72,7 +72,7 @@ dist: composer distdir sign package
 
 .PHONY: composer
 composer:
-	$(COMPOSER_BIN) install --no-dev
+	$(COMPOSER_BIN) install --no-dev --ignore-platform-reqs
 
 .PHONY: distdir
 distdir:
