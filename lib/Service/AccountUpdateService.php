@@ -20,7 +20,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-namespace OCA\OpenIdConnect\Service;
+namespace OCA\CesnetOpenIdConnect\Service;
 
 use OCA\CesnetOpenIdConnect\Client;
 use OC\User\LoginException;
