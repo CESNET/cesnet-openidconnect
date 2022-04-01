@@ -27,6 +27,7 @@ use OC\User\LoginException;
 use OC\User\Session;
 use OCA\CesnetOpenIdConnect\Client;
 use OCA\CesnetOpenIdConnect\Logger;
+use OCA\CesnetOpenIdConnect\Service\AccountUpdateService;
 use OCA\CesnetOpenIdConnect\Service\GroupSyncService;
 use OCA\CesnetOpenIdConnect\Service\UserLookupService;
 use OCP\AppFramework\Controller;
@@ -70,6 +71,11 @@ class LoginFlowController extends Controller {
 	 * @var ICacheFactory
 	 */
 	private $memCacheFactory;
+	/**
+	 * @var AccountUpdateService
+	 */
+	private $accountUpdateService;
+
 
 	public function __construct(
 		string $appName,
@@ -80,7 +86,8 @@ class LoginFlowController extends Controller {
 		ISession $session,
 		ILogger $logger,
 		Client $client,
-		ICacheFactory $memCacheFactory
+		ICacheFactory $memCacheFactory,
+		AccountUpdateService $accountUpdateService
 	) {
 		parent::__construct($appName, $request);
 		if (!$userSession instanceof Session) {
@@ -94,6 +101,7 @@ class LoginFlowController extends Controller {
 		$this->client = $client;
 		$this->logger = new Logger($logger);
 		$this->memCacheFactory = $memCacheFactory;
+		$this->accountUpdateService = $accountUpdateService;
 	}
 
 	/**
@@ -157,6 +165,10 @@ class LoginFlowController extends Controller {
 
 		if ($this->groupSyncService->enabled()) {
 			$this->groupSyncService->syncUserGroups($user, $userInfo);
+		}
+
+		if ($this->accountUpdateService->enabled()) {
+			$this->accountUpdateService->updateAccountInfo($user, $userInfo);
 		}
 
 		// trigger login process

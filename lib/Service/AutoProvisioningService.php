@@ -57,6 +57,10 @@ class AutoProvisioningService {
 	 * @var Client
 	 */
 	private $client;
+	/**
+	 * @var AccountUpdateService
+	 */
+	private $accountUpdateService;
 
 	public function __construct(
 		IUserManager $userManager,
@@ -64,7 +68,8 @@ class AutoProvisioningService {
 		IAvatarManager $avatarManager,
 		IClientService $clientService,
 		ILogger $logger,
-		Client $client
+		Client $client,
+		AccountUpdateService $accountUpdateService
 	) {
 		$this->userManager = $userManager;
 		$this->groupManager = $groupManager;
@@ -72,22 +77,23 @@ class AutoProvisioningService {
 		$this->logger = $logger;
 		$this->clientService = $clientService;
 		$this->client = $client;
+		$this->accountUpdateService = $accountUpdateService;
 	}
 
 	public function createUser($userInfo): IUser {
 		if (!$this->enabled()) {
 			throw new LoginException('Auto provisioning is disabled.');
 		}
-		$attribute = $this->identityClaim();
+		$attribute = $this->client->getIdentityClaim();
 		$emailOrUserId = $userInfo->$attribute ?? null;
 		if (!$emailOrUserId) {
 			throw new LoginException("Configured attribute $attribute is not known.");
 		}
 
-		$openIdConfig = $this->getOpenIdConfiguration();
+		$openIdConfig = $this->client->getOpenIdConfiguration();
 
 		$stripUserIdDomain = $openIdConfig['auto-provision']['strip-userid-domain'] ?? false;
-		$userId = $this->mode() === 'email' ? $this->generateUserId() : $stripUserIdDomain ? \strstr($emailOrUserId, '@', true) : $emailOrUserId;;
+		$userId = $this->client->mode() === 'email' ? $this->generateUserId() : $stripUserIdDomain ? \strstr($emailOrUserId, '@', true) : $emailOrUserId;
 
 		$provisioningClaim = $openIdConfig['auto-provision']['provisioning-claim'] ?? null;
 		if ($provisioningClaim) {
@@ -103,26 +109,12 @@ class AutoProvisioningService {
 			}
 		}
 
-		$email = $this->mode() === 'email' ? $emailOrUserId: null;
 		$user = $this->userManager->createUser($userId, $this->generatePassword());
 		if (!$user) {
 			throw new LoginException("Unable to create user $userId");
 		}
 		$user->setEnabled(true);
 
-		if ($email) {
-			$user->setEMailAddress($email);
-		} else {
-			$emailClaim = $openIdConfig['auto-provision']['email-claim'] ?? null;
-			if ($emailClaim) {
-				$user->setEMailAddress($userInfo->$emailClaim);
-			}
-		}
-
-		$displayNameClaim = $openIdConfig['auto-provision']['display-name-claim'] ?? null;
-		if ($displayNameClaim) {
-			$user->setDisplayName($userInfo->$displayNameClaim);
-		}
 		$groups = $openIdConfig['auto-provision']['groups'] ?? [];
 		foreach ($groups as $group) {
 			$g = $this->groupManager->get($group);
@@ -130,9 +122,11 @@ class AutoProvisioningService {
 				$g->addUser($user);
 			}
 		}
-		$pictureClaim = $openIdConfig['auto-provision']['picture-claim'] ?? null;
-		if ($pictureClaim) {
-			$pictureUrl = $userInfo->$pictureClaim;
+
+		$this->accountUpdateService->updateAccountInfo($user, $userInfo, true);
+
+		$pictureUrl = $this->client->getUserPicture($userInfo);
+		if ($pictureUrl) {
 			try {
 				$resource = $this->downloadPicture($pictureUrl);
 				$av = $this->avatarManager->getAvatar($user->getUID());
@@ -146,20 +140,9 @@ class AutoProvisioningService {
 
 		return $user;
 	}
-	public function getOpenIdConfiguration(): array {
-		return $this->client->getOpenIdConfig() ?? [];
-	}
 
 	public function enabled(): bool {
-		return $this->getOpenIdConfiguration()['auto-provision']['enabled'] ?? false;
-	}
-
-	private function mode() {
-		return $this->getOpenIdConfiguration()['mode'] ?? 'userid';
-	}
-
-	private function identityClaim() {
-		return $this->getOpenIdConfiguration()['search-attribute'] ?? 'email';
+		return $this->client->getOpenIdConfiguration()['auto-provision']['enabled'] ?? false;
 	}
 
 	protected function downloadPicture(string $pictureUrl): string {

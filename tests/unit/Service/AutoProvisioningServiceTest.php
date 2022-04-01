@@ -23,6 +23,7 @@
 namespace OCA\CesnetOpenIdConnect\Tests\Unit\Service;
 
 use OC\User\LoginException;
+use OCA\CesnetOpenIdConnect\Service\AccountUpdateService;
 use OCA\CesnetOpenIdConnect\Service\AutoProvisioningService;
 use OCA\CesnetOpenIdConnect\Client;
 use OCP\Http\Client\IClient;
@@ -64,6 +65,10 @@ class AutoProvisioningServiceTest extends TestCase {
 	 * @var IClientService|MockObject
 	 */
 	private $clientService;
+	/**
+	 * @var AccountUpdateService|MockObject
+	 */
+	private $accountUpdateService;
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -73,6 +78,7 @@ class AutoProvisioningServiceTest extends TestCase {
 		$this->clientService = $this->createMock(IClientService::class);
 		$logger = $this->createMock(ILogger::class);
 		$this->client = $this->createMock(Client::class);
+		$this->accountUpdateService = $this->createMock(AccountUpdateService::class);
 
 		$this->autoProvisioningService = new AutoProvisioningService(
 			$this->userManager,
@@ -80,7 +86,8 @@ class AutoProvisioningServiceTest extends TestCase {
 			$this->avatarManager,
 			$this->clientService,
 			$logger,
-			$this->client
+			$this->client,
+			$this->accountUpdateService
 		);
 	}
 
