@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "73d409104c005e47d9a09e3ea29c3def",
+    "content-hash": "26e154aa3c71cd2eb4c7e749f18e12c7",
     "packages": [
         {
             "name": "jumbojett/openid-connect-php",
@@ -273,6 +273,53 @@
                 }
             ],
             "time": "2022-04-04T05:15:45+00:00"
+        },
+        {
+            "name": "tobias/urn",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tobias-trozowski/urn.git",
+                "reference": "82747c5c3402aa26cef666c72c592663227b39ab"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tobias-trozowski/urn/zipball/82747c5c3402aa26cef666c72c592663227b39ab",
+                "reference": "82747c5c3402aa26cef666c72c592663227b39ab",
+                "shasum": ""
+            },
+            "require": {
+                "ext-intl": "*",
+                "ext-mbstring": "*",
+                "php": "^7.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.0",
+                "squizlabs/php_codesniffer": "^3.4"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Tobias\\Urn\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A PHP library for generating and parsing RFC 2141 and RFC 8141 compliant uniform resource names (URN).",
+            "keywords": [
+                "URN",
+                "parser",
+                "rfc2141",
+                "rfc8141"
+            ],
+            "support": {
+                "issues": "https://github.com/tobias-trozowski/urn/issues",
+                "source": "https://github.com/tobias-trozowski/urn/tree/master"
+            },
+            "time": "2019-07-13T15:34:06+00:00"
         }
     ],
     "packages-dev": [
@@ -348,5 +395,5 @@
     "platform-overrides": {
         "php": "7.3"
     },
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.3.0"
 }
