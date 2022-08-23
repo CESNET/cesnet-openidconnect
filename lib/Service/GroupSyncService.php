@@ -25,13 +25,10 @@ namespace OCA\CesnetOpenIdConnect\Service;
 use OCA\CesnetOpenIdConnect\Db\GroupMapper;
 
 use OC\User\LoginException;
-use OCP\Http\Client\IClientService;
-use OCP\IAvatarManager;
 use OCP\IConfig;
 use OCP\IGroup;
 use OCP\IGroupManager;
 use OCP\ILogger;
-use OCP\IUser;
 use OCP\IUserManager;
 use Tobias\Urn\Exception\ParserException;
 use Tobias\Urn\RFC8141\Parser;
