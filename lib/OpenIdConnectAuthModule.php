@@ -1,8 +1,9 @@
 <?php
 /**
  * @author Thomas Müller <thomas.mueller@tmit.eu>
+ * @author Miroslav Bauer <Miroslav.Bauer@cesnet.cz>
  *
- * @copyright Copyright (c) 2020, ownCloud GmbH
+ * @copyright Copyright (c) 2022, ownCloud GmbH
  * @license GPL-2.0
  *
  * This program is free software; you can redistribute it and/or
@@ -21,9 +22,9 @@
  */
 namespace OCA\CesnetOpenIdConnect;
 
-use JuliusPC\OpenIDConnectClientException;
+use Jumbojett\OpenIDConnectClientException;
 use OC\User\LoginException;
-use OCA\CesnetOpenIdConnect\Service\AccountUpdateService;
+use OCA\CesnetOpenIdConnect\Service\AutoProvisioningService;
 use OCA\CesnetOpenIdConnect\Service\UserLookupService;
 use OCP\Authentication\IAuthModule;
 use OCP\ICache;
@@ -52,8 +53,8 @@ class OpenIdConnectAuthModule implements IAuthModule {
 	private $client;
 	/** @var UserLookupService */
 	private $lookupService;
-	/** @var AccountUpdateService */
-	private $accountUpdateService;
+	/** @var AutoProvisioningService */
+	private $autoProvisioningService;
 
 	/**
 	 * OpenIdConnectAuthModule constructor.
@@ -63,7 +64,7 @@ class OpenIdConnectAuthModule implements IAuthModule {
 	 * @param ICacheFactory $cacheFactory
 	 * @param UserLookupService $lookupService
 	 * @param Client $client
-	 * @param AccountUpdateService $accountUpdateService
+	 * @param AutoProvisioningService $autoProvisioningService
 	 */
 	public function __construct(
 		IUserManager $manager,
@@ -71,14 +72,14 @@ class OpenIdConnectAuthModule implements IAuthModule {
 		ICacheFactory $cacheFactory,
 		UserLookupService $lookupService,
 		Client $client,
-		AccountUpdateService $accountUpdateService
+		AutoProvisioningService $autoProvisioningService
 	) {
 		$this->manager = $manager;
 		$this->logger = new Logger($logger);
 		$this->cacheFactory = $cacheFactory;
 		$this->client = $client;
 		$this->lookupService = $lookupService;
-		$this->autoUpdateService = $accountUpdateService;
+		$this->autoProvisioningService = $autoProvisioningService;
 	}
 
 	/**
@@ -88,26 +89,31 @@ class OpenIdConnectAuthModule implements IAuthModule {
 	 */
 	public function auth(IRequest $request): ?IUser {
 		$authHeader = $request->getHeader('Authorization');
-		if (\strpos($authHeader, 'Bearer ') === false) {
-			return null;
+
+		if (stripos($authHeader, 'bearer ') === 0) {
+			$bearerToken = \substr($authHeader, 7);
+			return $this->authToken('Bearer', $bearerToken);
 		}
-		$bearerToken = \substr($authHeader, 7);
-		return $this->authToken($bearerToken);
+
+		if (stripos($authHeader, 'pop ') === 0) {
+			$bearerToken = \substr($authHeader, 4);
+			return $this->authToken('PoP', $bearerToken);
+		}
+
+		return null;
 	}
 
 	/**
-	 * @param string $bearerToken
-	 * @return IUser|null
 	 * @throws LoginException
 	 */
-	public function authToken(string $bearerToken): ?IUser {
-		$this->logger->debug('OpenIdConnectAuthModule::authToken ' . $bearerToken);
+	public function authToken(string $type, string $token): ?IUser {
+		$this->logger->debug("OpenIdConnectAuthModule::authToken $type $token");
 		try {
 			if ($this->client->getOpenIdConfig() === null) {
 				return null;
 			}
-			// 1. verify JWT signature
-			$expiry = $this->verifyJWT($bearerToken);
+			// 1. verify token
+			$expiry = $this->verifyToken($token);
 
 			// 2. verify expiry
 			if ($expiry) {
@@ -119,12 +125,12 @@ class OpenIdConnectAuthModule implements IAuthModule {
 			}
 
 			// 3. get user
-			$user = $this->getUserResource($bearerToken);
+			$user = $this->getUserResource($token);
 			if ($user) {
-				$this->updateCache($bearerToken, $user, $expiry);
+				$this->updateCache($token, $user, $expiry);
 				return $user;
 			}
-			$this->logger->debug('OpenIdConnectAuthModule::authToken : no user retrieved from token ' . $bearerToken);
+			$this->logger->debug('OpenIdConnectAuthModule::authToken : no user retrieved from token ' . $token);
 			return null;
 		} catch (OpenIDConnectClientException $ex) {
 			$this->logger->logException($ex);
@@ -142,42 +148,16 @@ class OpenIdConnectAuthModule implements IAuthModule {
 	}
 
 	/**
-	 * @param string $bearerToken
 	 * @throws OpenIDConnectClientException
 	 */
-	private function verifyJWT($bearerToken) {
+	private function verifyToken(string $token) {
 		$cache = $this->getCache();
-		$userInfo = $cache->get($bearerToken);
+		$userInfo = $cache->get($token);
 		if ($userInfo) {
 			return $userInfo['exp'];
 		}
-		$config = $this->client->getOpenIdConfig();
-		$useIntrospectionEndpoint = $config['use-token-introspection-endpoint'] ?? false;
-		if ($useIntrospectionEndpoint) {
-			$introspectionClientId = $config['token-introspection-endpoint-client-id'] ?? null;
-			$introspectionClientSecret = $config['token-introspection-endpoint-client-secret'] ?? null;
 
-			$introData = $this->client->introspectToken($bearerToken, '', $introspectionClientId, $introspectionClientSecret);
-			$this->logger->debug('Introspection info: ' . \json_encode($introData));
-			if (\property_exists($introData, 'error')) {
-				$this->logger->error('Token introspection failed: ' . \json_encode($introData));
-				throw new OpenIDConnectClientException("Verifying token failed: {$introData->error}");
-			}
-			if (!$introData->active) {
-				$this->logger->error('Token (as per introspection) is inactive: ' . \json_encode($introData));
-				throw new OpenIDConnectClientException('Token (as per introspection) is inactive');
-			}
-			return $introData->exp;
-		}
-		if (!$this->client->verifyJWTsignature($bearerToken)) {
-			$this->logger->error('Token cannot be verified: ' . $bearerToken);
-			throw new OpenIDConnectClientException('Token cannot be verified.');
-		}
-		$this->client->setAccessToken($bearerToken);
-		$payload = $this->client->getAccessTokenPayload();
-		$this->logger->debug('Access token payload: ' . \json_encode($payload));
-		/* @phan-suppress-next-line PhanTypeExpectedObjectPropAccess */
-		return $payload->exp;
+		return $this->client->verifyToken($token);
 	}
 
 	/**
@@ -188,7 +168,7 @@ class OpenIdConnectAuthModule implements IAuthModule {
 		return $this->cacheFactory->create('oca.openid-connect.2');
 	}
 
-	private function getUserResource($bearerToken) {
+	private function getUserResource($bearerToken): ?IUser {
 		$cache = $this->getCache();
 		$userInfo = $cache->get($bearerToken);
 		if ($userInfo) {
@@ -197,16 +177,15 @@ class OpenIdConnectAuthModule implements IAuthModule {
 		}
 
 		$this->client->setAccessToken($bearerToken);
-
 		$userInfo = $this->client->getUserInfo();
 		$this->logger->debug('OpenIdConnectAuthModule::getUserResource from cache: ' . \json_encode($userInfo));
 		if ($userInfo === null) {
 			return null;
 		}
-
 		$user = $this->lookupService->lookupUser($userInfo);
-		if ($this->accountUpdateService->enabled()) {
-			$this->accountUpdateService->updateAccountInfo($user, $userInfo);
+
+		if ($this->autoProvisioningService->autoUpdateEnabled()) {
+			$this->autoProvisioningService->updateAccountInfo($user, $userInfo);
 		}
 
 		return $user;

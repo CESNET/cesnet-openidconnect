@@ -89,7 +89,7 @@ class UserLookupService {
 		if ($searchByEmail) {
 			$user = $this->userManager->getByEmail($userInfo->$attribute);
 			if (!$user) {
-				if ($this->autoProvisioningService->enabled()) {
+				if ($this->autoProvisioningService->autoProvisioningEnabled()) {
 					return $this->autoProvisioningService->createUser($userInfo);
 				}
 
@@ -101,7 +101,8 @@ class UserLookupService {
 			$this->validUser($user[0]);
 			return $user[0];
 		}
-		$stripUserIdDomain = $openIdConfig['auto-provision']['strip-userid-domain'] ?? false;
+
+		$stripUserIdDomain = $this->client->getAutoProvisionConfig()['strip-userid-domain'] ?? false;
 		$userName = $stripUserIdDomain? \strstr($userInfo->$attribute, '@', true) : $userInfo->$attribute;
 
 		$user = $this->userManager->get($userName);
@@ -116,8 +117,8 @@ class UserLookupService {
 				if ($this->autoProvisioningService->enabled()) {
 					return $this->autoProvisioningService->createUser($userInfo);
 				}
-				throw new LoginException("User {$userInfo->$attribute} is not known.");
 			}
+			throw new LoginException("User {$userInfo->$attribute} is not known.");
 		}
 		$this->validUser($user);
 		return $user;

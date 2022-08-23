@@ -1,8 +1,9 @@
 <?php
 /**
  * @author Thomas Müller <thomas.mueller@tmit.eu>
+ * @author Miroslav Bauer <Miroslav.Bauer@cesnet.cz>
  *
- * @copyright Copyright (c) 2020, ownCloud GmbH
+ * @copyright Copyright (c) 2022, ownCloud GmbH
  * @license GPL-2.0
  *
  * This program is free software; you can redistribute it and/or
@@ -21,13 +22,13 @@
  */
 namespace OCA\CesnetOpenIdConnect\Controller;
 
-use JuliusPC\OpenIDConnectClientException;
+use Jumbojett\OpenIDConnectClientException;
 use OC\HintException;
 use OC\User\LoginException;
 use OC\User\Session;
 use OCA\CesnetOpenIdConnect\Client;
 use OCA\CesnetOpenIdConnect\Logger;
-use OCA\CesnetOpenIdConnect\Service\AccountUpdateService;
+use OCA\CesnetOpenIdConnect\Service\AutoProvisioningService;
 use OCA\CesnetOpenIdConnect\Service\GroupSyncService;
 use OCA\CesnetOpenIdConnect\Service\UserLookupService;
 use OCP\AppFramework\Controller;
@@ -72,10 +73,9 @@ class LoginFlowController extends Controller {
 	 */
 	private $memCacheFactory;
 	/**
-	 * @var AccountUpdateService
+	 * @var AutoProvisioningService
 	 */
-	private $accountUpdateService;
-
+	private $autoProvisioningService;
 
 	public function __construct(
 		string $appName,
@@ -87,7 +87,7 @@ class LoginFlowController extends Controller {
 		ILogger $logger,
 		Client $client,
 		ICacheFactory $memCacheFactory,
-		AccountUpdateService $accountUpdateService
+		AutoProvisioningService $autoProvisioningService
 	) {
 		parent::__construct($appName, $request);
 		if (!$userSession instanceof Session) {
@@ -101,7 +101,7 @@ class LoginFlowController extends Controller {
 		$this->client = $client;
 		$this->logger = new Logger($logger);
 		$this->memCacheFactory = $memCacheFactory;
-		$this->accountUpdateService = $accountUpdateService;
+		$this->autoProvisioningService = $autoProvisioningService;
 	}
 
 	/**
@@ -167,8 +167,8 @@ class LoginFlowController extends Controller {
 			$this->groupSyncService->syncUserGroups($user, $userInfo);
 		}
 
-		if ($this->accountUpdateService->enabled()) {
-			$this->accountUpdateService->updateAccountInfo($user, $userInfo);
+		if ($this->autoProvisioningService->autoUpdateEnabled()) {
+			$this->autoProvisioningService->updateAccountInfo($user, $userInfo);
 		}
 
 		// trigger login process

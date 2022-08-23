@@ -22,12 +22,13 @@
 
 namespace OCA\CesnetOpenIdConnect\Tests\Unit\Controller;
 
-use JuliusPC\OpenIDConnectClientException;
+use Jumbojett\OpenIDConnectClientException;
 use OC\HintException;
 use OC\User\LoginException;
 use OC\User\Session;
 use OCA\CesnetOpenIdConnect\Client;
 use OCA\CesnetOpenIdConnect\Controller\LoginFlowController;
+use OCA\CesnetOpenIdConnect\Service\AutoProvisioningService;
 use OCA\CesnetOpenIdConnect\Service\UserLookupService;
 use OCP\AppFramework\Http\RedirectResponse;
 use OCP\ICacheFactory;
@@ -73,6 +74,10 @@ class LoginFlowControllerLoginTest extends TestCase {
 	 * @var MockObject | ICacheFactory
 	 */
 	private $memCacheFactory;
+	/**
+	 * @var MockObject | AutoProvisioningService
+	 */
+	private $autoProvisioningService;
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -83,6 +88,7 @@ class LoginFlowControllerLoginTest extends TestCase {
 		$this->logger = $this->createMock(ILogger::class);
 		$this->client = $this->createMock(Client::class);
 		$this->memCacheFactory = $this->createMock(ICacheFactory::class);
+		$this->autoProvisioningService = $this->createMock(AutoProvisioningService::class);
 
 		$this->controller = new LoginFlowController(
 			'openidconnect',
@@ -92,7 +98,8 @@ class LoginFlowControllerLoginTest extends TestCase {
 			$this->session,
 			$this->logger,
 			$this->client,
-			$this->memCacheFactory
+			$this->memCacheFactory,
+			$this->autoProvisioningService
 		);
 	}
 
