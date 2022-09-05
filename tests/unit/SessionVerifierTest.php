@@ -22,17 +22,13 @@
 
 namespace OCA\CesnetOpenIdConnect\Tests\Unit;
 
-use JsonException;
-use Jumbojett\OpenIDConnectClientException;
 use OC\HintException;
 use OCA\CesnetOpenIdConnect\Client;
 use OCA\CesnetOpenIdConnect\Logger;
 use OCA\CesnetOpenIdConnect\SessionVerifier;
 use OCP\ICache;
 use OCP\ICacheFactory;
-use OCP\IConfig;
 use OCP\ISession;
-use OCP\IURLGenerator;
 use OCP\IUserSession;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -45,6 +41,10 @@ class SessionVerifierTest extends TestCase {
 	 */
 	private $sessionVerifier;
 	/**
+	 * @var MockObject | EventDispatcherInterface
+	 */
+	private $dispatcher;
+	/**
 	 * @var MockObject | ISession
 	 */
 	private $session;
@@ -52,6 +52,10 @@ class SessionVerifierTest extends TestCase {
 	 * @var MockObject | IUserSession
 	 */
 	private $userSession;
+	/**
+	 * @var MockObject | Logger
+	 */
+	private $logger;
 	/**
 	 * @var MockObject | ICacheFactory
 	 */
@@ -63,27 +67,16 @@ class SessionVerifierTest extends TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
-		$dispatcher = $this->createMock(EventDispatcherInterface::class);
+		$this->dispatcher = $this->createMock(EventDispatcherInterface::class);
 		$this->session = $this->createMock(ISession::class);
 		$this->userSession = $this->createMock(IUserSession::class);
-		$logger = $this->createMock(Logger::class);
+		$this->logger = $this->createMock(Logger::class);
 		$this->cacheFactory = $this->createMock(ICacheFactory::class);
+		$this->client = $this->createMock(Client::class);
 
-		$config = $this->createMock(IConfig::class);
-		$generator = $this->createMock(IURLGenerator::class);
-		$this->client = $this->getMockBuilder(Client::class)
-			->onlyMethods(['refreshToken', 'signOut', 'getOpenIdConfig', 'verifyJWTsignature', 'getAccessTokenPayload', 'setAccessToken', 'introspectToken'])
-			->setConstructorArgs([$config, $generator, $this->session, $logger])
-			->getMock();
-
-		$this->sessionVerifier = new SessionVerifier($logger, $this->session, $this->userSession, $this->cacheFactory, $dispatcher, $this->client);
+		$this->sessionVerifier = new SessionVerifier($this->logger, $this->session, $this->userSession, $this->cacheFactory, $this->dispatcher, $this->client);
 	}
 
-	/**
-	 * @throws OpenIDConnectClientException
-	 * @throws HintException
-	 * @throws JsonException
-	 */
 	public function testOpenIdSessionExpired(): void {
 		$this->session->method('get')->with('oca.openid-connect.session-id')->willReturn('SID-1234');
 		$cache = $this->createMock(ICache::class);
@@ -95,11 +88,6 @@ class SessionVerifierTest extends TestCase {
 		$this->sessionVerifier->verifySession();
 	}
 
-	/**
-	 * @throws OpenIDConnectClientException
-	 * @throws HintException
-	 * @throws JsonException
-	 */
 	public function testNoAccessTokenInSession(): void {
 		$this->session->method('get')->withConsecutive(
 			['oca.openid-connect.session-id'],
@@ -111,11 +99,6 @@ class SessionVerifierTest extends TestCase {
 		$this->sessionVerifier->verifySession();
 	}
 
-	/**
-	 * @throws OpenIDConnectClientException
-	 * @throws HintException
-	 * @throws JsonException
-	 */
 	public function testValidCachedAccessToken(): void {
 		$this->session->method('get')->withConsecutive(
 			['oca.openid-connect.session-id'],
@@ -130,11 +113,6 @@ class SessionVerifierTest extends TestCase {
 		$this->sessionVerifier->verifySession();
 	}
 
-	/**
-	 * @throws OpenIDConnectClientException
-	 * @throws HintException
-	 * @throws JsonException
-	 */
 	public function testInvalidCachedAccessTokenNoRefresh(): void {
 		$this->session->method('get')->withConsecutive(
 			['oca.openid-connect.session-id'],
@@ -150,11 +128,6 @@ class SessionVerifierTest extends TestCase {
 		$this->sessionVerifier->verifySession();
 	}
 
-	/**
-	 * @throws OpenIDConnectClientException
-	 * @throws HintException
-	 * @throws JsonException
-	 */
 	public function testInvalidCachedAccessTokenRefresh(): void {
 		$this->session->method('get')->withConsecutive(
 			['oca.openid-connect.session-id'],
@@ -173,10 +146,6 @@ class SessionVerifierTest extends TestCase {
 		$this->sessionVerifier->verifySession();
 	}
 
-	/**
-	 * @throws OpenIDConnectClientException
-	 * @throws JsonException
-	 */
 	public function testInvalidCachedAccessTokenRefreshError(): void {
 		$this->session->method('get')->withConsecutive(
 			['oca.openid-connect.session-id'],
@@ -197,11 +166,6 @@ class SessionVerifierTest extends TestCase {
 		$this->sessionVerifier->verifySession();
 	}
 
-	/**
-	 * @throws OpenIDConnectClientException
-	 * @throws HintException
-	 * @throws JsonException
-	 */
 	public function testValidFreshAccessToken(): void {
 		$this->session->method('get')->withConsecutive(
 			['oca.openid-connect.session-id'],
@@ -220,11 +184,6 @@ class SessionVerifierTest extends TestCase {
 		$this->sessionVerifier->verifySession();
 	}
 
-	/**
-	 * @throws OpenIDConnectClientException
-	 * @throws HintException
-	 * @throws JsonException
-	 */
 	public function testValidFreshAccessTokenWithIntrospection(): void {
 		$this->session->method('get')->withConsecutive(
 			['oca.openid-connect.session-id'],
@@ -243,7 +202,7 @@ class SessionVerifierTest extends TestCase {
 		$this->sessionVerifier->verifySession();
 	}
 
-	public function provideOpenIdConfig(): array {
+	public function provideOpenIdConfig() {
 		return [
 			[null, null],
 			[[], null],
@@ -256,9 +215,8 @@ class SessionVerifierTest extends TestCase {
 	 * @dataProvider provideOpenIdConfig
 	 * @param string[]|null $openIdConfig
 	 * @param string $expectedLogoutRedirectUri
-	 * @throws JsonException
 	 */
-	public function testLogoutRedirect($openIdConfig, $expectedLogoutRedirectUri): void {
+	public function testLogoutRedirect($openIdConfig, $expectedLogoutRedirectUri) {
 		$this->client->method('getOpenIdConfig')
 			->willReturn($openIdConfig);
 		$this->client->expects($this->once())

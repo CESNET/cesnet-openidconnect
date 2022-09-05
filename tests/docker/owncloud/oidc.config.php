@@ -6,5 +6,6 @@ $CONFIG = [
 		'client-secret' => 'ownCloud',
 		'search-attribute' => 'sub',
 		'mode' => 'userid',
+		'use-token-introspection-endpoint' => false,
 	],
 ];
