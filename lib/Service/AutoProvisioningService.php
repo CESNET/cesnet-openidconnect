@@ -87,7 +87,7 @@ class AutoProvisioningService {
 
 		$config = $this->client->getAutoProvisionConfig();
 		$stripUserIdDomain = $config['strip-userid-domain'] ?? false;
-		$userId = $this->mode() === 'email' ? $this->generateUserId() : ($stripUserIdDomain ? \strstr($emailOrUserId, '@', true) : $emailOrUserId);
+		$userId = $this->client->mode() === 'email' ? $this->generateUserId() : ($stripUserIdDomain ? \strstr($emailOrUserId, '@', true) : $emailOrUserId);
 
 		$provisioningClaim = $config['provisioning-claim'] ?? null;
 		if ($provisioningClaim) {
