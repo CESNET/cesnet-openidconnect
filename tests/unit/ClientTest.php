@@ -22,8 +22,6 @@
 
 namespace OCA\CesnetOpenIdConnect\Tests\Unit;
 
-use JsonException;
-use Jumbojett\OpenIDConnectClientException;
 use OCA\CesnetOpenIdConnect\Client;
 use OCP\IConfig;
 use OCP\ISession;
@@ -78,7 +76,7 @@ class ClientTest extends TestCase {
 
 		$this->client = $this->getMockBuilder(Client::class)
 			->setConstructorArgs([$this->config, $this->urlGenerator, $this->session, $this->logger])
-			->onlyMethods(['fetchURL'])
+			->setMethods(['fetchURL'])
 			->getMock();
 	}
 
@@ -93,7 +91,7 @@ class ClientTest extends TestCase {
 	 */
 	public function testGetAppConfig($expectedData, $dataInConfig, $expectedErrorMessage = null): void {
 		$this->config->method('getSystemValue')->willReturn('from system config');
-		$this->config->expects(self::once())->method('getAppValue')->willReturnCallback(function () use ($dataInConfig) {
+		$this->config->expects(self::once())->method('getAppValue')->willReturnCallback(function ($app, $key, $default) use ($dataInConfig) {
 			return $dataInConfig;
 		});
 		if ($expectedErrorMessage) {
@@ -103,10 +101,6 @@ class ClientTest extends TestCase {
 		self::assertEquals($expectedData, $return);
 	}
 
-	/**
-	 * @throws OpenIDConnectClientException
-	 * @throws JsonException
-	 */
 	public function testGetWellKnown(): void {
 		$this->client->setProviderURL('https://example.net');
 		$this->client->expects(self::once())->method('fetchURL')->with('https://example.net/.well-known/openid-configuration')->willReturn('{"foo": "bar"}');
@@ -114,9 +108,6 @@ class ClientTest extends TestCase {
 		self::assertEquals((object)['foo' => 'bar'], $return);
 	}
 
-	/**
-	 * @throws OpenIDConnectClientException
-	 */
 	public function testCtor(): void {
 		$providerUrl = 'https://example.net';
 
@@ -141,7 +132,7 @@ class ClientTest extends TestCase {
 		});
 		$this->client = $this->getMockBuilder(Client::class)
 			->setConstructorArgs([$this->config, $this->urlGenerator, $this->session, $this->logger])
-			->onlyMethods(['fetchURL'])
+			->setMethods(['fetchURL'])
 			->getMock();
 
 		self::assertEquals($providerUrl, $this->client->getProviderURL());
@@ -149,9 +140,6 @@ class ClientTest extends TestCase {
 		self::assertEquals(true, $this->client->getVerifyPeer());
 	}
 
-	/**
-	 * @throws OpenIDConnectClientException
-	 */
 	public function testCtorInsecure(): void {
 		$providerUrl = 'https://example.net';
 
@@ -177,7 +165,7 @@ class ClientTest extends TestCase {
 		});
 		$this->client = $this->getMockBuilder(Client::class)
 			->setConstructorArgs([$this->config, $this->urlGenerator, $this->session, $this->logger])
-			->onlyMethods(['fetchURL'])
+			->setMethods(['fetchURL'])
 			->getMock();
 
 		self::assertEquals($providerUrl, $this->client->getProviderURL());
@@ -188,16 +176,15 @@ class ClientTest extends TestCase {
 	/**
 	 * @dataProvider providesGetUserInfoData
 	 * @param $useAccessTokenPayloadForUserInfo
-	 * @throws JsonException
-	 * @throws OpenIDConnectClientException
 	 */
 	public function testGetUserInfo($useAccessTokenPayloadForUserInfo): void {
-		$this->config->method('getSystemValue')->willReturnCallback(static function ($key) {
+		$this->config->method('getSystemValue')->willReturnCallback(static function ($key) use ($useAccessTokenPayloadForUserInfo) {
 			if ($key === 'openid-connect') {
 				return [
 					'provider-url' => '$providerUrl',
 					'client-id' => 'client-id',
 					'client-secret' => 'secret',
+					'use-access-token-payload-for-user-info' => $useAccessTokenPayloadForUserInfo
 				];
 			}
 			if ($key === 'proxy') {
@@ -215,18 +202,18 @@ class ClientTest extends TestCase {
 			->getMock();
 		if ($useAccessTokenPayloadForUserInfo) {
 			$this->client->expects(self::never())->method('requestUserInfo');
-			$this->client->expects(self::once())->method('getAccessTokenPayload')->willReturn((object)[
+			$this->client->expects(self::once())->method('getAccessTokenPayload')->willReturn([
 				'preferred_username' => 'alice@example.net'
 			]);
 		} else {
-			$this->client->expects(self::once())->method('getAccessTokenPayload')->willReturn(null);
-			$this->client->expects(self::once())->method('requestUserInfo')->willReturn((object)[
+			$this->client->expects(self::never())->method('getAccessTokenPayload');
+			$this->client->expects(self::once())->method('requestUserInfo')->willReturn([
 				'preferred_username' => 'alice@example.net'
 			]);
 		}
 
 		$info = $this->client->getUserInfo();
-		self::assertEquals((object)[
+		self::assertEquals([
 			'preferred_username' => 'alice@example.net'
 		], $info);
 	}
