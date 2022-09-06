@@ -117,8 +117,8 @@ class UserLookupService {
 				if ($this->autoProvisioningService->autoProvisioningEnabled()) {
 					return $this->autoProvisioningService->createUser($userInfo);
 				}
+				throw new LoginException("User {$userInfo->$attribute} is not known.");
 			}
-			throw new LoginException("User {$userInfo->$attribute} is not known.");
 		}
 		$this->validUser($user);
 		return $user;
