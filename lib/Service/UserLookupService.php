@@ -114,7 +114,7 @@ class UserLookupService {
 				$this->logger->info(sprintf('UserLookupService::lookupUser : mapped: %s to %s',  $userInfo->$attribute, $user->getUID()));
 			}
 			if (!$user) {
-				if ($this->autoProvisioningService->enabled()) {
+				if ($this->autoProvisioningService->autoProvisioningEnabled()) {
 					return $this->autoProvisioningService->createUser($userInfo);
 				}
 			}
