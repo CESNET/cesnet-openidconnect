@@ -4,31 +4,30 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "26e154aa3c71cd2eb4c7e749f18e12c7",
+    "content-hash": "f6849edf76971ea5baabfccb6cf2aab1",
     "packages": [
         {
             "name": "jumbojett/openid-connect-php",
-            "version": "v0.9.8",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jumbojett/OpenID-Connect-PHP.git",
-                "reference": "1f800145f64e1151f9d623dedc71a66f4143341f"
+                "reference": "4af1d11497ec765dccddf928c14c04535ca96017"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jumbojett/OpenID-Connect-PHP/zipball/1f800145f64e1151f9d623dedc71a66f4143341f",
-                "reference": "1f800145f64e1151f9d623dedc71a66f4143341f",
+                "url": "https://api.github.com/repos/jumbojett/OpenID-Connect-PHP/zipball/4af1d11497ec765dccddf928c14c04535ca96017",
+                "reference": "4af1d11497ec765dccddf928c14c04535ca96017",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
                 "ext-json": "*",
-                "paragonie/random_compat": ">=2",
-                "php": ">=5.4",
-                "phpseclib/phpseclib": "~2.0 || ^3.0"
+                "php": ">=7.0",
+                "phpseclib/phpseclib": "~3.0"
             },
             "require-dev": {
-                "roave/security-advisories": "dev-master",
+                "roave/security-advisories": "dev-latest",
                 "yoast/phpunit-polyfills": "^1.0"
             },
             "type": "library",
@@ -44,9 +43,9 @@
             "description": "Bare-bones OpenID Connect client",
             "support": {
                 "issues": "https://github.com/jumbojett/OpenID-Connect-PHP/issues",
-                "source": "https://github.com/jumbojett/OpenID-Connect-PHP/tree/v0.9.8"
+                "source": "https://github.com/jumbojett/OpenID-Connect-PHP/tree/v1.0.0"
             },
-            "time": "2022-08-05T13:48:50+00:00"
+            "time": "2023-12-13T09:52:12+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
@@ -167,16 +166,16 @@
         },
         {
             "name": "phpseclib/phpseclib",
-            "version": "3.0.14",
+            "version": "3.0.34",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpseclib/phpseclib.git",
-                "reference": "2f0b7af658cbea265cbb4a791d6c29a6613f98ef"
+                "reference": "56c79f16a6ae17e42089c06a2144467acc35348a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/2f0b7af658cbea265cbb4a791d6c29a6613f98ef",
-                "reference": "2f0b7af658cbea265cbb4a791d6c29a6613f98ef",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/56c79f16a6ae17e42089c06a2144467acc35348a",
+                "reference": "56c79f16a6ae17e42089c06a2144467acc35348a",
                 "shasum": ""
             },
             "require": {
@@ -188,6 +187,7 @@
                 "phpunit/phpunit": "*"
             },
             "suggest": {
+                "ext-dom": "Install the DOM extension to load XML formatted public keys.",
                 "ext-gmp": "Install the GMP (GNU Multiple Precision) extension in order to speed up arbitrary precision integer arithmetic operations.",
                 "ext-libsodium": "SSH2/SFTP can make use of some algorithms provided by the libsodium-php extension.",
                 "ext-mcrypt": "Install the Mcrypt extension in order to speed up a few other cryptographic operations.",
@@ -256,7 +256,7 @@
             ],
             "support": {
                 "issues": "https://github.com/phpseclib/phpseclib/issues",
-                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.14"
+                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.34"
             },
             "funding": [
                 {
@@ -272,7 +272,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-04-04T05:15:45+00:00"
+            "time": "2023-11-27T11:13:31+00:00"
         },
         {
             "name": "tobias/urn",
@@ -395,5 +395,5 @@
     "platform-overrides": {
         "php": "7.3"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
